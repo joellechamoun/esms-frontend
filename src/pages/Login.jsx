@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/examflow-logo.png";
@@ -20,9 +21,19 @@ function Login() {
       });
 
       localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      toast.success(`Welcome ${res.data.user.name || ""}`);
+
+      if (res.data.user.role === "Student") {
+        navigate("/student/courses");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid credentials");
+      toast.error(
+        err.response?.data?.message || "Invalid credentials"
+      );
     }
   };
 
@@ -32,7 +43,7 @@ function Login() {
         <img src={logo} alt="ExamFlow Logo" className="login-logo" />
 
         <h2>Welcome Back</h2>
-        <p>Login to access the ExamFlow admin dashboard</p>
+        <p>Login to access the ExamFlow account</p>
 
         <form onSubmit={handleLogin}>
           <label>Email Address</label>

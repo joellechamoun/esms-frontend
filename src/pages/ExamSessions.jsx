@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function ExamSessions() {
   const [examSessions, setExamSessions] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -22,7 +26,7 @@ function ExamSessions() {
       setExamSessions(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch exam sessions");
+      toast.error("Failed to fetch exam sessions");
     }
   };
 
@@ -40,6 +44,16 @@ function ExamSessions() {
     setEditingId(null);
   };
 
+  const openDeleteModal = (id) => {
+    setSelectedSessionId(id);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedSessionId(null);
+    setShowDeleteModal(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,15 +67,17 @@ function ExamSessions() {
 
       if (editingId) {
         await api.put(`/exam-sessions/${editingId}`, sessionData);
+        toast.success("Exam session updated successfully");
       } else {
         await api.post("/exam-sessions", sessionData);
+        toast.success("Exam session added successfully");
       }
 
       resetForm();
       fetchExamSessions();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to save exam session");
+      toast.error(err.response?.data?.message || "Failed to save exam session");
     }
   };
 
@@ -76,17 +92,18 @@ function ExamSessions() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this exam session?")) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!selectedSessionId) return;
 
     try {
-      await api.delete(`/exam-sessions/${id}`);
+      await api.delete(`/exam-sessions/${selectedSessionId}`);
+      toast.success("Exam session deleted successfully");
+      closeDeleteModal();
       fetchExamSessions();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete exam session");
+      toast.error("Failed to delete exam session");
+      closeDeleteModal();
     }
   };
 
@@ -189,7 +206,7 @@ function ExamSessions() {
                   </button>
                   <button
                     className="table-btn danger-btn"
-                    onClick={() => handleDelete(session._id)}
+                    onClick={() => openDeleteModal(session._id)}
                   >
                     Delete
                   </button>
@@ -207,6 +224,15 @@ function ExamSessions() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Exam Session"
+          message="Are you sure you want to delete this exam session? This action cannot be undone."
+          onCancel={closeDeleteModal}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
 
 function TimeSlots() {
@@ -30,7 +31,7 @@ function TimeSlots() {
       setExamSessions(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch exam sessions");
+      toast.error("Failed to fetch exam sessions");
     }
   };
 
@@ -40,7 +41,7 @@ function TimeSlots() {
       setTimeSlots(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch time slots");
+      toast.error("Failed to fetch time slots");
     }
   };
 
@@ -52,7 +53,7 @@ function TimeSlots() {
     e.preventDefault();
 
     if (!selectedSession) {
-      alert("Please select an exam session first");
+      toast.warning("Please select an exam session first");
       return;
     }
 
@@ -63,6 +64,8 @@ function TimeSlots() {
         endTime: form.endTime,
       });
 
+      toast.success("Time slot added successfully");
+
       setForm({
         date: "",
         startTime: "",
@@ -72,7 +75,7 @@ function TimeSlots() {
       fetchTimeSlots();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to create time slot");
+      toast.error(err.response?.data?.message || "Failed to create time slot");
     }
   };
 

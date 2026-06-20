@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Rooms() {
   const [rooms, setRooms] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
@@ -21,7 +25,7 @@ function Rooms() {
       setRooms(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch rooms");
+      toast.error("Failed to fetch rooms");
     }
   };
 
@@ -38,6 +42,16 @@ function Rooms() {
     setEditingId(null);
   };
 
+  const openDeleteModal = (id) => {
+    setSelectedRoomId(id);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedRoomId(null);
+    setShowDeleteModal(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -50,15 +64,17 @@ function Rooms() {
 
       if (editingId) {
         await api.put(`/rooms/${editingId}`, roomData);
+        toast.success("Room updated successfully");
       } else {
         await api.post("/rooms", roomData);
+        toast.success("Room added successfully");
       }
 
       resetForm();
       fetchRooms();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to save room");
+      toast.error(err.response?.data?.message || "Failed to save room");
     }
   };
 
@@ -72,15 +88,18 @@ function Rooms() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this room?")) return;
+  const handleDelete = async () => {
+    if (!selectedRoomId) return;
 
     try {
-      await api.delete(`/rooms/${id}`);
+      await api.delete(`/rooms/${selectedRoomId}`);
+      toast.success("Room deleted successfully");
+      closeDeleteModal();
       fetchRooms();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete room");
+      toast.error("Failed to delete room");
+      closeDeleteModal();
     }
   };
 
@@ -164,7 +183,7 @@ function Rooms() {
                   </button>
                   <button
                     className="table-btn danger-btn"
-                    onClick={() => handleDelete(room._id)}
+                    onClick={() => openDeleteModal(room._id)}
                   >
                     Delete
                   </button>
@@ -182,6 +201,15 @@ function Rooms() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Room"
+          message="Are you sure you want to delete this room? This action cannot be undone."
+          onCancel={closeDeleteModal}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

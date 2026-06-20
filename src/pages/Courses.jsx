@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
 
   const [form, setForm] = useState({
     code: "",
@@ -23,7 +27,7 @@ function Courses() {
       setCourses(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch courses");
+      toast.error("Failed to fetch courses");
     }
   };
 
@@ -42,6 +46,16 @@ function Courses() {
     setEditingId(null);
   };
 
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setSelectedCourseId(null);
+  };
+
+  const openDeleteModal = (id) => {
+    setSelectedCourseId(id);
+    setShowDeleteModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -56,15 +70,17 @@ function Courses() {
 
       if (editingId) {
         await api.put(`/courses/${editingId}`, courseData);
+        toast.success("Course updated successfully");
       } else {
         await api.post("/courses", courseData);
+        toast.success("Course added successfully");
       }
 
       resetForm();
       fetchCourses();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to save course");
+      toast.error(err.response?.data?.message || "Failed to save course");
     }
   };
 
@@ -79,15 +95,18 @@ function Courses() {
     });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this course?")) return;
+  const handleDelete = async () => {
+    if (!selectedCourseId) return;
 
     try {
-      await api.delete(`/courses/${id}`);
+      await api.delete(`/courses/${selectedCourseId}`);
+      toast.success("Course deleted successfully");
+      closeDeleteModal();
       fetchCourses();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete course");
+      toast.error("Failed to delete course");
+      closeDeleteModal();
     }
   };
 
@@ -185,6 +204,7 @@ function Courses() {
               <th>Year</th>
               <th>Semester</th>
               <th>Term</th>
+              <th>Students</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -198,12 +218,18 @@ function Courses() {
                 <td>{course.semester}</td>
                 <td>{course.term}</td>
                 <td>
-                  <button className="table-btn" onClick={() => handleEdit(course)}>
+                  <strong>{course.registeredCount || 0}</strong>
+                </td>
+                <td>
+                  <button
+                    className="table-btn"
+                    onClick={() => handleEdit(course)}
+                  >
                     Edit
                   </button>
                   <button
                     className="table-btn danger-btn"
-                    onClick={() => handleDelete(course._id)}
+                    onClick={() => openDeleteModal(course._id)}
                   >
                     Delete
                   </button>
@@ -213,7 +239,7 @@ function Courses() {
 
             {courses.length === 0 && (
               <tr>
-                <td colSpan="6" className="empty-table">
+                <td colSpan="7" className="empty-table">
                   No courses added yet.
                 </td>
               </tr>
@@ -221,6 +247,15 @@ function Courses() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Course"
+          message="Are you sure you want to delete this course? This action cannot be undone."
+          onCancel={closeDeleteModal}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

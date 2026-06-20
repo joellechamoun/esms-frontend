@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
 
 function Schedule() {
@@ -22,7 +23,7 @@ function Schedule() {
       setExamSessions(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load exam sessions");
+      toast.error("Failed to load exam sessions");
     }
   };
 
@@ -38,7 +39,7 @@ function Schedule() {
       setExams(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load exam schedule");
+      toast.error("Failed to load exam schedule");
     }
   };
 
@@ -62,6 +63,8 @@ function Schedule() {
     });
 
     setTimeout(fetchExams, 0);
+
+    toast.info("Filters reset");
   };
 
   const groupedByYear = exams.reduce((acc, exam) => {
@@ -138,7 +141,11 @@ function Schedule() {
             Apply Filters
           </button>
 
-          <button type="button" className="secondary-btn" onClick={resetFilters}>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={resetFilters}
+          >
             Reset
           </button>
         </form>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import api from "../api/axios";
 
 function Exams() {
@@ -41,7 +42,7 @@ function Exams() {
       setRooms(roomsRes.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load scheduling data");
+      toast.error("Failed to load scheduling data");
     }
   };
 
@@ -51,7 +52,7 @@ function Exams() {
       setTimeSlots(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load time slots");
+      toast.error("Failed to load time slots");
     }
   };
 
@@ -61,7 +62,7 @@ function Exams() {
       setExams(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to load exams");
+      toast.error("Failed to load exams");
     }
   };
 
@@ -86,7 +87,7 @@ function Exams() {
         examSession: form.examSession,
       });
 
-      alert("Exam scheduled successfully");
+      toast.success("Exam scheduled successfully");
 
       setForm({
         examSession: "",
@@ -99,7 +100,7 @@ function Exams() {
       fetchExams();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to schedule exam");
+      toast.error(err.response?.data?.message || "Failed to schedule exam");
     }
   };
 

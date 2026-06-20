@@ -1,0 +1,78 @@
+.student-layout {
+    min-height: 100vh;
+    background: #f5f7fb;
+    font-family: Arial, sans-serif;
+  }
+  
+  .student-topbar {
+    height: 70px;
+    background: #0b2f57;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+  }
+  
+  .student-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+  }
+  
+  .student-brand img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+  }
+  
+  .student-brand h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  
+  .student-brand p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #c9a24d;
+  }
+  
+  .student-topbar button {
+    background: #c9a24d;
+    color: #071b33;
+  }
+  
+  .student-menu {
+    background: #f2e6cc;
+    border-bottom: 1px solid #e0d4b4;
+    display: flex;
+    gap: 5px;
+    padding: 0 25px;
+  }
+  
+  .student-menu a {
+    padding: 14px 18px;
+    color: #2c2c2c;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .student-menu a:hover {
+    background: #ead9b0;
+  }
+  
+  .student-menu a.active {
+    border-bottom: 3px solid #c9a24d;
+    background: #fff6dd;
+  }
+  
+  .student-content {
+    padding: 35px;
+  }
+  
+  .student-page {
+    max-width: 1420px;
+    margin: 0 auto;
+  }
