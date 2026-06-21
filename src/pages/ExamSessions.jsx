@@ -9,11 +9,18 @@ function ExamSessions() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
 
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from(
+    { length: 11 },
+    (_, index) => currentYear + index
+  );
+
   const [form, setForm] = useState({
-    name: "",
+    season: "",
+    academicYear: "",
+    examType: "",
     startDate: "",
     endDate: "",
-    status: "Draft",
   });
 
   useEffect(() => {
@@ -36,10 +43,11 @@ function ExamSessions() {
 
   const resetForm = () => {
     setForm({
-      name: "",
+      season: "",
+      academicYear: "",
+      examType: "",
       startDate: "",
       endDate: "",
-      status: "Draft",
     });
     setEditingId(null);
   };
@@ -59,10 +67,11 @@ function ExamSessions() {
 
     try {
       const sessionData = {
-        name: form.name,
+        season: form.season,
+        academicYear: Number(form.academicYear),
+        examType: form.examType,
         startDate: form.startDate,
         endDate: form.endDate,
-        status: form.status,
       };
 
       if (editingId) {
@@ -85,10 +94,11 @@ function ExamSessions() {
     setEditingId(session._id);
 
     setForm({
-      name: session.name,
-      startDate: session.startDate?.slice(0, 10),
-      endDate: session.endDate?.slice(0, 10),
-      status: session.status,
+      season: session.season || "",
+      academicYear: session.academicYear ? String(session.academicYear) : "",
+      examType: session.examType || "",
+      startDate: session.startDate?.slice(0, 10) || "",
+      endDate: session.endDate?.slice(0, 10) || "",
     });
   };
 
@@ -102,7 +112,9 @@ function ExamSessions() {
       fetchExamSessions();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete exam session");
+      toast.error(
+        err.response?.data?.message || "Failed to delete exam session"
+      );
       closeDeleteModal();
     }
   };
@@ -112,8 +124,8 @@ function ExamSessions() {
       <div className="page-header">
         <h2>Exam Sessions Management</h2>
         <p>
-          Create and manage exam periods such as midterms, finals, and session
-          status.
+          Create and manage exam periods by season, academic year, and exam
+          type.
         </p>
       </div>
 
@@ -124,13 +136,41 @@ function ExamSessions() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <input
-            name="name"
-            placeholder="Session Name"
-            value={form.name}
+          <select
+            name="season"
+            value={form.season}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Select Season</option>
+            <option value="Fall">Fall</option>
+            <option value="Spring">Spring</option>
+          </select>
+
+          <select
+            name="academicYear"
+            value={form.academicYear}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Year</option>
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+
+          <select
+            name="examType"
+            value={form.examType}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Exam Type</option>
+            <option value="Midterm">Midterm</option>
+            <option value="Final">Final</option>
+          </select>
 
           <input
             name="startDate"
@@ -147,17 +187,6 @@ function ExamSessions() {
             onChange={handleChange}
             required
           />
-
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            required
-          >
-            <option value="Draft">Draft</option>
-            <option value="Generated">Generated</option>
-            <option value="Published">Published</option>
-          </select>
 
           <button type="submit" className="primary-btn">
             {editingId ? "Update Session" : "Add Session"}
@@ -183,9 +212,11 @@ function ExamSessions() {
           <thead>
             <tr>
               <th>Session Name</th>
+              <th>Season</th>
+              <th>Year</th>
+              <th>Type</th>
               <th>Start Date</th>
               <th>End Date</th>
-              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -194,9 +225,11 @@ function ExamSessions() {
             {examSessions.map((session) => (
               <tr key={session._id}>
                 <td className="strong-cell">{session.name}</td>
+                <td>{session.season}</td>
+                <td>{session.academicYear}</td>
+                <td>{session.examType}</td>
                 <td>{session.startDate?.slice(0, 10)}</td>
                 <td>{session.endDate?.slice(0, 10)}</td>
-                <td>{session.status}</td>
                 <td>
                   <button
                     className="table-btn"
@@ -216,7 +249,7 @@ function ExamSessions() {
 
             {examSessions.length === 0 && (
               <tr>
-                <td colSpan="5" className="empty-table">
+                <td colSpan="7" className="empty-table">
                   No exam sessions added yet.
                 </td>
               </tr>

@@ -128,6 +128,7 @@ function Rooms() {
           <input
             name="capacity"
             type="number"
+            min="1"
             placeholder="Capacity"
             value={form.capacity}
             onChange={handleChange}

@@ -35,6 +35,14 @@ function StudentCourses() {
     return registrations.some((reg) => reg.course?._id === courseId);
   };
 
+  const getMajorLabel = (major) => {
+    if (!major) return "No major";
+    if (typeof major === "string") return "Major assigned";
+    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
+      major.name || ""
+    }`;
+  };
+
   const handleRegister = async (courseId) => {
     try {
       await api.post("/registrations", { courseId });
@@ -66,9 +74,9 @@ function StudentCourses() {
             <tr>
               <th>Code</th>
               <th>Course Name</th>
+              <th>Major</th>
               <th>Year</th>
               <th>Semester</th>
-              <th>Term</th>
               <th>Registration</th>
             </tr>
           </thead>
@@ -78,9 +86,9 @@ function StudentCourses() {
               <tr key={course._id}>
                 <td className="strong-cell">{course.code}</td>
                 <td>{course.name}</td>
+                <td>{getMajorLabel(course.major)}</td>
                 <td>{course.year}</td>
                 <td>{course.semester}</td>
-                <td>{course.term}</td>
                 <td>
                   {isRegistered(course._id) ? (
                     <span className="registered-badge">Registered</span>

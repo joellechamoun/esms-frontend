@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
+import Majors from "./pages/Majors";
 import Rooms from "./pages/Rooms";
 import ExamSessions from "./pages/ExamSessions";
 import Schedule from "./pages/Schedule";
@@ -35,6 +36,7 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/majors" element={<Majors />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/exam-sessions" element={<ExamSessions />} />

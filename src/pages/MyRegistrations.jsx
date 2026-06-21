@@ -19,9 +19,15 @@ function MyRegistrations() {
     }
   };
 
-  const validRegistrations = registrations.filter(
-    (reg) => reg.course
-  );
+  const getMajorLabel = (major) => {
+    if (!major) return "No major";
+    if (typeof major === "string") return "Major assigned";
+    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
+      major.name || ""
+    }`;
+  };
+
+  const validRegistrations = registrations.filter((reg) => reg.course);
 
   const groupedBySemester = validRegistrations.reduce((acc, reg) => {
     const semester = reg.course?.semester || "Unknown";
@@ -60,20 +66,18 @@ function MyRegistrations() {
               <tr>
                 <th>Code</th>
                 <th>Course Name</th>
+                <th>Major</th>
                 <th>Year</th>
-                <th>Term</th>
               </tr>
             </thead>
 
             <tbody>
               {groupedBySemester[semester].map((reg) => (
                 <tr key={reg._id}>
-                  <td className="strong-cell">
-                    {reg.course?.code}
-                  </td>
+                  <td className="strong-cell">{reg.course?.code}</td>
                   <td>{reg.course?.name}</td>
+                  <td>{getMajorLabel(reg.course?.major)}</td>
                   <td>{reg.course?.year}</td>
-                  <td>{reg.course?.term}</td>
                 </tr>
               ))}
             </tbody>

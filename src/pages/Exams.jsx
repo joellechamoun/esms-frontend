@@ -66,6 +66,20 @@ function Exams() {
     }
   };
 
+  const getMajorLabel = (major) => {
+    if (!major) return "No major";
+    if (typeof major === "string") return "Major assigned";
+    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
+      major.name || ""
+    }`;
+  };
+
+  const getCourseOptionLabel = (course) => {
+    const majorLabel = getMajorLabel(course.major);
+
+    return `${course.code} - ${course.name} | ${majorLabel} | Year ${course.year}`;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -147,7 +161,7 @@ function Exams() {
             <option value="">Select Course</option>
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
-                {course.code} - {course.name} (Year {course.year})
+                {getCourseOptionLabel(course)}
               </option>
             ))}
           </select>
@@ -198,6 +212,7 @@ function Exams() {
           <thead>
             <tr>
               <th>Course</th>
+              <th>Major</th>
               <th>Year</th>
               <th>Room</th>
               <th>Date</th>
@@ -212,6 +227,7 @@ function Exams() {
                 <td className="strong-cell">
                   {exam.course?.code} - {exam.course?.name}
                 </td>
+                <td>{getMajorLabel(exam.course?.major)}</td>
                 <td>{exam.course?.year}</td>
                 <td>{exam.room?.name}</td>
                 <td>{exam.timeSlot?.date}</td>
@@ -224,7 +240,7 @@ function Exams() {
 
             {exams.length === 0 && (
               <tr>
-                <td colSpan="6" className="empty-table">
+                <td colSpan="7" className="empty-table">
                   No exams scheduled yet.
                 </td>
               </tr>

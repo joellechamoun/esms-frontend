@@ -5,6 +5,7 @@ import ConfirmModal from "../components/ConfirmModal";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
+  const [majors, setMajors] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -12,13 +13,24 @@ function Courses() {
   const [form, setForm] = useState({
     code: "",
     name: "",
+    major: "",
     year: "",
     semester: "",
-    term: "",
   });
+
+  const semestersByYear = {
+    1: ["S1", "S2"],
+    2: ["S3", "S4"],
+    3: ["S5", "S6"],
+    4: ["S7", "S8"],
+    5: ["S9", "S10"],
+  };
+
+  const availableSemesters = form.year ? semestersByYear[form.year] || [] : [];
 
   useEffect(() => {
     fetchCourses();
+    fetchMajors();
   }, []);
 
   const fetchCourses = async () => {
@@ -31,17 +43,42 @@ function Courses() {
     }
   };
 
+  const fetchMajors = async () => {
+    try {
+      const res = await api.get("/majors");
+      setMajors(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch majors");
+    }
+  };
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleYearChange = (e) => {
+    const selectedYear = e.target.value;
+
+    setForm((prev) => ({
+      ...prev,
+      year: selectedYear,
+      semester: "",
+    }));
   };
 
   const resetForm = () => {
     setForm({
       code: "",
       name: "",
+      major: "",
       year: "",
       semester: "",
-      term: "",
     });
     setEditingId(null);
   };
@@ -59,13 +96,18 @@ function Courses() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!availableSemesters.includes(form.semester)) {
+      toast.error("Please select a valid semester for the selected year");
+      return;
+    }
+
     try {
       const courseData = {
         code: form.code,
         name: form.name,
+        major: form.major,
         year: Number(form.year),
         semester: form.semester,
-        term: form.term,
       };
 
       if (editingId) {
@@ -86,12 +128,13 @@ function Courses() {
 
   const handleEdit = (course) => {
     setEditingId(course._id);
+
     setForm({
-      code: course.code,
-      name: course.name,
-      year: course.year,
-      semester: course.semester,
-      term: course.term,
+      code: course.code || "",
+      name: course.name || "",
+      major: course.major?._id || course.major || "",
+      year: course.year ? String(course.year) : "",
+      semester: course.semester || "",
     });
   };
 
@@ -114,7 +157,7 @@ function Courses() {
     <div className="portal-page">
       <div className="page-header">
         <h2>Courses Management</h2>
-        <p>Manage academic courses by year, semester, and term.</p>
+        <p>Manage academic courses by major, year, and semester.</p>
       </div>
 
       <div className="form-card course-form-card">
@@ -140,41 +183,48 @@ function Courses() {
             required
           />
 
-          <input
-            name="year"
-            type="number"
-            placeholder="Year"
-            value={form.year}
+          <select
+            name="major"
+            value={form.major}
             onChange={handleChange}
             required
-          />
+          >
+            <option value="">Select Major</option>
+            {majors.map((major) => (
+              <option key={major._id} value={major._id}>
+                {major.code} - {major.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            name="year"
+            value={form.year}
+            onChange={handleYearChange}
+            required
+          >
+            <option value="">Select Year</option>
+            <option value="1">Year 1 / L1</option>
+            <option value="2">Year 2 / L2</option>
+            <option value="3">Year 3 / L3</option>
+            <option value="4">Year 4 / M1</option>
+            <option value="5">Year 5 / M2</option>
+          </select>
 
           <select
             name="semester"
             value={form.semester}
             onChange={handleChange}
             required
+            disabled={!form.year}
           >
             <option value="">Select Semester</option>
-            <option value="S1">S1</option>
-            <option value="S2">S2</option>
-            <option value="S3">S3</option>
-            <option value="S4">S4</option>
-            <option value="S5">S5</option>
-            <option value="S6">S6</option>
-            <option value="S7">S7</option>
-            <option value="S8">S8</option>
-            <option value="S9">S9</option>
-            <option value="S10">S10</option>
+            {availableSemesters.map((semester) => (
+              <option key={semester} value={semester}>
+                {semester}
+              </option>
+            ))}
           </select>
-
-          <input
-            name="term"
-            placeholder="Term e.g. Spring 2026"
-            value={form.term}
-            onChange={handleChange}
-            required
-          />
 
           <button type="submit" className="primary-btn">
             {editingId ? "Update Course" : "Add Course"}
@@ -201,9 +251,9 @@ function Courses() {
             <tr>
               <th>Code</th>
               <th>Name</th>
+              <th>Major</th>
               <th>Year</th>
               <th>Semester</th>
-              <th>Term</th>
               <th>Students</th>
               <th>Actions</th>
             </tr>
@@ -214,9 +264,15 @@ function Courses() {
               <tr key={course._id}>
                 <td className="strong-cell">{course.code}</td>
                 <td>{course.name}</td>
+                <td>
+                  {course.major
+                    ? `${course.major.code || ""}${
+                        course.major.code && course.major.name ? " - " : ""
+                      }${course.major.name || ""}`
+                    : "No major"}
+                </td>
                 <td>{course.year}</td>
                 <td>{course.semester}</td>
-                <td>{course.term}</td>
                 <td>
                   <strong>{course.registeredCount || 0}</strong>
                 </td>

@@ -39,6 +39,7 @@ function AdminLayout() {
       {!isHome && (
         <nav className="portal-menu">
           <NavLink to="/dashboard">Home</NavLink>
+          <NavLink to="/majors">Majors</NavLink>
           <NavLink to="/courses">Courses</NavLink>
           <NavLink to="/rooms">Rooms</NavLink>
           <NavLink to="/exam-sessions">Exam Sessions</NavLink>

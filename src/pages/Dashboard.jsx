@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 
+import majorsIcon from "../assets/icons/majors.png";
 import coursesIcon from "../assets/icons/courses.png";
 import roomsIcon from "../assets/icons/rooms.png";
 import sessionsIcon from "../assets/icons/sessions.png";
@@ -10,8 +11,14 @@ import scheduleIcon from "../assets/icons/schedule.png";
 function Dashboard() {
   const cards = [
     {
+      title: "Majors",
+      text: "Manage academic majors and study programs.",
+      path: "/majors",
+      icon: majorsIcon,
+    },
+    {
       title: "Courses",
-      text: "Manage academic courses by year, semester, and term.",
+      text: "Manage academic courses by major, year, semester, and term.",
       path: "/courses",
       icon: coursesIcon,
     },
@@ -53,8 +60,8 @@ function Dashboard() {
         <div className="uni-hero-content">
           <h1>Welcome to ExamFlow</h1>
           <p>
-            Organize exam sessions, courses, rooms, time slots, and final
-            schedules in one academic platform.
+            Organize majors, courses, exam sessions, rooms, time slots, and
+            final schedules in one academic platform.
           </p>
 
           <div className="uni-hero-icons">

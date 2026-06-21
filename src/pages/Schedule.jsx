@@ -5,15 +5,17 @@ import api from "../api/axios";
 function Schedule() {
   const [exams, setExams] = useState([]);
   const [examSessions, setExamSessions] = useState([]);
+  const [majors, setMajors] = useState([]);
 
   const [filters, setFilters] = useState({
     examSession: "",
     year: "",
-    term: "",
+    major: "",
   });
 
   useEffect(() => {
     fetchExamSessions();
+    fetchMajors();
     fetchExams();
   }, []);
 
@@ -27,13 +29,23 @@ function Schedule() {
     }
   };
 
+  const fetchMajors = async () => {
+    try {
+      const res = await api.get("/majors");
+      setMajors(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load majors");
+    }
+  };
+
   const fetchExams = async () => {
     try {
       const params = {};
 
       if (filters.examSession) params.examSession = filters.examSession;
       if (filters.year) params.year = filters.year;
-      if (filters.term) params.term = filters.term;
+      if (filters.major) params.major = filters.major;
 
       const res = await api.get("/exams", { params });
       setExams(res.data);
@@ -41,6 +53,14 @@ function Schedule() {
       console.error(err);
       toast.error("Failed to load exam schedule");
     }
+  };
+
+  const getMajorLabel = (major) => {
+    if (!major) return "No major";
+    if (typeof major === "string") return "Major assigned";
+    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
+      major.name || ""
+    }`;
   };
 
   const handleFilterChange = (e) => {
@@ -59,11 +79,10 @@ function Schedule() {
     setFilters({
       examSession: "",
       year: "",
-      term: "",
+      major: "",
     });
 
     setTimeout(fetchExams, 0);
-
     toast.info("Filters reset");
   };
 
@@ -91,14 +110,14 @@ function Schedule() {
         <h2>Final Exam Schedule</h2>
         <p>
           View the final exam schedule grouped by academic year, with filters
-          for session, year, and term.
+          for session, major, and year.
         </p>
       </div>
 
       <div className="form-card">
         <div className="section-title">
           <h3>Filter Schedule</h3>
-          <p>Filter by exam session, academic year, or term.</p>
+          <p>Filter by exam session, major, or academic year.</p>
         </div>
 
         <form onSubmit={applyFilters}>
@@ -116,6 +135,19 @@ function Schedule() {
           </select>
 
           <select
+            name="major"
+            value={filters.major}
+            onChange={handleFilterChange}
+          >
+            <option value="">All Majors</option>
+            {majors.map((major) => (
+              <option key={major._id} value={major._id}>
+                {major.code} - {major.name}
+              </option>
+            ))}
+          </select>
+
+          <select
             name="year"
             value={filters.year}
             onChange={handleFilterChange}
@@ -126,15 +158,6 @@ function Schedule() {
             <option value="3">Year 3 / L3</option>
             <option value="4">Year 4 / M1</option>
             <option value="5">Year 5 / M2</option>
-          </select>
-
-          <select
-            name="term"
-            value={filters.term}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Terms</option>
-            <option value="current">Current Term</option>
           </select>
 
           <button type="submit" className="primary-btn">
@@ -172,6 +195,7 @@ function Schedule() {
                   <th>Time</th>
                   <th>Course Code</th>
                   <th>Course Name</th>
+                  <th>Major</th>
                   <th>Room</th>
                   <th>Exam Session</th>
                 </tr>
@@ -182,11 +206,11 @@ function Schedule() {
                   <tr key={exam._id}>
                     <td className="strong-cell">{exam.timeSlot?.date}</td>
                     <td>
-                      {exam.timeSlot?.startTime} -{" "}
-                      {exam.timeSlot?.endTime}
+                      {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
                     </td>
                     <td>{exam.course?.code}</td>
                     <td>{exam.course?.name}</td>
+                    <td>{getMajorLabel(exam.course?.major)}</td>
                     <td>{exam.room?.name}</td>
                     <td>{exam.examSession?.name}</td>
                   </tr>

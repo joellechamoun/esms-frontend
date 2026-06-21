@@ -20,6 +20,14 @@ function StudentSchedule() {
     }
   };
 
+  const getMajorLabel = (major) => {
+    if (!major) return "No major";
+    if (typeof major === "string") return "Major assigned";
+    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
+      major.name || ""
+    }`;
+  };
+
   const semesters = [
     ...new Set(exams.map((exam) => exam.course?.semester).filter(Boolean)),
   ];
@@ -79,6 +87,7 @@ function StudentSchedule() {
               <th>Date</th>
               <th>Time</th>
               <th>Course</th>
+              <th>Major</th>
               <th>Semester</th>
               <th>Room</th>
               <th>Session</th>
@@ -95,6 +104,7 @@ function StudentSchedule() {
                 <td>
                   {exam.course?.code} - {exam.course?.name}
                 </td>
+                <td>{getMajorLabel(exam.course?.major)}</td>
                 <td>{exam.course?.semester}</td>
                 <td>{exam.room?.name}</td>
                 <td>{exam.examSession?.name}</td>
@@ -103,7 +113,7 @@ function StudentSchedule() {
 
             {filteredExams.length === 0 && (
               <tr>
-                <td colSpan="6" className="empty-table">
+                <td colSpan="7" className="empty-table">
                   No exams found for the selected semester.
                 </td>
               </tr>
