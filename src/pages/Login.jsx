@@ -31,9 +31,7 @@ function Login() {
         navigate("/dashboard");
       }
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Invalid credentials"
-      );
+      toast.error(err.response?.data?.message || "Invalid credentials");
     }
   };
 
@@ -49,7 +47,7 @@ function Login() {
           <label>Email Address</label>
           <input
             type="email"
-            placeholder="admin@esms.com"
+            placeholder="name@esms.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -67,9 +65,17 @@ function Login() {
           <button type="submit">Login</button>
         </form>
 
-        <Link to="/" className="back-home">
-          Back to Home
-        </Link>
+        <div className="login-links">
+          <span>Don't have an account?</span>
+
+          <Link to="/register" className="register-link">
+            Create Student Account
+          </Link>
+
+          <Link to="/" className="back-home">
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

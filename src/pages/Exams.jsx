@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function Exams() {
   const [examSessions, setExamSessions] = useState([]);
@@ -8,6 +9,9 @@ function Exams() {
   const [rooms, setRooms] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [exams, setExams] = useState([]);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState(null);
 
   const [form, setForm] = useState({
     examSession: "",
@@ -76,7 +80,6 @@ function Exams() {
 
   const getCourseOptionLabel = (course) => {
     const majorLabel = getMajorLabel(course.major);
-
     return `${course.code} - ${course.name} | ${majorLabel} | Year ${course.year}`;
   };
 
@@ -88,6 +91,31 @@ function Exams() {
       [name]: value,
       ...(name === "examSession" ? { timeSlot: "" } : {}),
     }));
+  };
+
+  const openDeleteModal = (id) => {
+    setSelectedExamId(id);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedExamId(null);
+    setShowDeleteModal(false);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedExamId) return;
+
+    try {
+      await api.delete(`/exams/${selectedExamId}`);
+      toast.success("Exam deleted successfully");
+      closeDeleteModal();
+      fetchExams();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete exam");
+      closeDeleteModal();
+    }
   };
 
   const handleScheduleExam = async (e) => {
@@ -218,6 +246,7 @@ function Exams() {
               <th>Date</th>
               <th>Time</th>
               <th>Session</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -235,12 +264,20 @@ function Exams() {
                   {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
                 </td>
                 <td>{exam.examSession?.name}</td>
+                <td>
+                  <button
+                    className="table-btn danger-btn"
+                    onClick={() => openDeleteModal(exam._id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
 
             {exams.length === 0 && (
               <tr>
-                <td colSpan="7" className="empty-table">
+                <td colSpan="8" className="empty-table">
                   No exams scheduled yet.
                 </td>
               </tr>
@@ -248,6 +285,15 @@ function Exams() {
           </tbody>
         </table>
       </div>
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Exam"
+          message="Are you sure you want to delete this scheduled exam? This action cannot be undone."
+          onCancel={closeDeleteModal}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }
