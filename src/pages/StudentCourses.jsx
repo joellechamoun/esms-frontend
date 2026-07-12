@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function StudentCourses() {
   const [courses, setCourses] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [showUnregisterModal, setShowUnregisterModal] = useState(false);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
   useEffect(() => {
     fetchCourses();
@@ -31,8 +34,8 @@ function StudentCourses() {
     }
   };
 
-  const isRegistered = (courseId) => {
-    return registrations.some((reg) => reg.course?._id === courseId);
+  const getRegistration = (courseId) => {
+    return registrations.find((reg) => reg.course?._id === courseId);
   };
 
   const getMajorLabel = (major) => {
@@ -51,6 +54,31 @@ function StudentCourses() {
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to register");
+    }
+  };
+
+  const openUnregisterModal = (registrationId) => {
+    setSelectedRegistrationId(registrationId);
+    setShowUnregisterModal(true);
+  };
+
+  const closeUnregisterModal = () => {
+    setShowUnregisterModal(false);
+    setSelectedRegistrationId(null);
+  };
+
+  const handleUnregister = async () => {
+    if (!selectedRegistrationId) return;
+
+    try {
+      await api.delete(`/registrations/${selectedRegistrationId}`);
+      toast.success("Unregistered successfully");
+      closeUnregisterModal();
+      fetchMyRegistrations();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to unregister");
+      closeUnregisterModal();
     }
   };
 
@@ -82,27 +110,36 @@ function StudentCourses() {
           </thead>
 
           <tbody>
-            {courses.map((course) => (
-              <tr key={course._id}>
-                <td className="strong-cell">{course.code}</td>
-                <td>{course.name}</td>
-                <td>{getMajorLabel(course.major)}</td>
-                <td>{course.year}</td>
-                <td>{course.semester}</td>
-                <td>
-                  {isRegistered(course._id) ? (
-                    <span className="registered-badge">Registered</span>
-                  ) : (
-                    <button
-                      className="table-btn"
-                      onClick={() => handleRegister(course._id)}
-                    >
-                      Register
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {courses.map((course) => {
+              const registration = getRegistration(course._id);
+
+              return (
+                <tr key={course._id}>
+                  <td className="strong-cell">{course.code}</td>
+                  <td>{course.name}</td>
+                  <td>{getMajorLabel(course.major)}</td>
+                  <td>{course.year}</td>
+                  <td>{course.semester}</td>
+                  <td>
+                    {registration ? (
+                      <button
+                        className="table-btn danger-btn"
+                        onClick={() => openUnregisterModal(registration._id)}
+                      >
+                        Unregister
+                      </button>
+                    ) : (
+                      <button
+                        className="table-btn"
+                        onClick={() => handleRegister(course._id)}
+                      >
+                        Register
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
 
             {courses.length === 0 && (
               <tr>
@@ -114,6 +151,16 @@ function StudentCourses() {
           </tbody>
         </table>
       </div>
+
+      {showUnregisterModal && (
+        <ConfirmModal
+          title="Unregister from Course"
+          message="Are you sure you want to unregister from this course?"
+          confirmLabel="Unregister"
+          onCancel={closeUnregisterModal}
+          onConfirm={handleUnregister}
+        />
+      )}
     </div>
   );
 }

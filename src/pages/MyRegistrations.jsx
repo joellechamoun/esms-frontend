@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 
 function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
+  const [showUnregisterModal, setShowUnregisterModal] = useState(false);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
   useEffect(() => {
     fetchRegistrations();
@@ -25,6 +28,31 @@ function MyRegistrations() {
     return `${major.code || ""}${major.code && major.name ? " - " : ""}${
       major.name || ""
     }`;
+  };
+
+  const openUnregisterModal = (registrationId) => {
+    setSelectedRegistrationId(registrationId);
+    setShowUnregisterModal(true);
+  };
+
+  const closeUnregisterModal = () => {
+    setShowUnregisterModal(false);
+    setSelectedRegistrationId(null);
+  };
+
+  const handleUnregister = async () => {
+    if (!selectedRegistrationId) return;
+
+    try {
+      await api.delete(`/registrations/${selectedRegistrationId}`);
+      toast.success("Unregistered successfully");
+      closeUnregisterModal();
+      fetchRegistrations();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to unregister");
+      closeUnregisterModal();
+    }
   };
 
   const validRegistrations = registrations.filter((reg) => reg.course);
@@ -68,6 +96,7 @@ function MyRegistrations() {
                 <th>Course Name</th>
                 <th>Major</th>
                 <th>Year</th>
+                <th>Actions</th>
               </tr>
             </thead>
 
@@ -78,12 +107,30 @@ function MyRegistrations() {
                   <td>{reg.course?.name}</td>
                   <td>{getMajorLabel(reg.course?.major)}</td>
                   <td>{reg.course?.year}</td>
+                  <td>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openUnregisterModal(reg._id)}
+                    >
+                      Unregister
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ))}
+
+      {showUnregisterModal && (
+        <ConfirmModal
+          title="Unregister from Course"
+          message="Are you sure you want to unregister from this course?"
+          confirmLabel="Unregister"
+          onCancel={closeUnregisterModal}
+          onConfirm={handleUnregister}
+        />
+      )}
     </div>
   );
 }

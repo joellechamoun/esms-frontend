@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import RegistrantsModal from "../components/RegistrantsModal";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
@@ -9,6 +10,7 @@ function Courses() {
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [registrantsCourse, setRegistrantsCourse] = useState(null);
 
   const [form, setForm] = useState({
     code: "",
@@ -274,7 +276,12 @@ function Courses() {
                 <td>{course.year}</td>
                 <td>{course.semester}</td>
                 <td>
-                  <strong>{course.registeredCount || 0}</strong>
+                  <button
+                    className="table-btn"
+                    onClick={() => setRegistrantsCourse(course)}
+                  >
+                    {course.registeredCount || 0} student(s)
+                  </button>
                 </td>
                 <td>
                   <button
@@ -310,6 +317,13 @@ function Courses() {
           message="Are you sure you want to delete this course? This action cannot be undone."
           onCancel={closeDeleteModal}
           onConfirm={handleDelete}
+        />
+      )}
+
+      {registrantsCourse && (
+        <RegistrantsModal
+          course={registrantsCourse}
+          onClose={() => setRegistrantsCourse(null)}
         />
       )}
     </div>

@@ -49,6 +49,14 @@ button:hover {
   background: #174d85;
 }
 
+.danger-btn {
+  background: #c0392b;
+}
+
+.danger-btn:hover {
+  background: #d84f3e;
+}
+
 /* ================= UNIVERSITY DASHBOARD ================= */
 
 .uni-home {
@@ -404,4 +412,32 @@ td {
   display: flex;
   justify-content: center;
   gap: 12px;
+}
+
+.registrants-modal {
+  width: 560px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18);
+  text-align: left;
+}
+
+.registrants-modal h3 {
+  margin: 0 0 6px;
+  color: #071b33;
+  font-size: 22px;
+}
+
+.registrants-modal > p {
+  margin: 0 0 20px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.registrants-modal .modal-actions {
+  margin-top: 20px;
 }
