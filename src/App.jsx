@@ -32,7 +32,7 @@ function App() {
         {/* Admin Portal */}
         <Route
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["Admin"]}>
               <AdminLayout />
             </ProtectedRoute>
           }
@@ -50,7 +50,7 @@ function App() {
         {/* Student Portal */}
         <Route
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["Student"]}>
               <StudentLayout />
             </ProtectedRoute>
           }
