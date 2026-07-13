@@ -57,6 +57,60 @@ button:hover {
   background: #d84f3e;
 }
 
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background: #0b2f57;
+}
+
+/* ================= SPINNER ================= */
+
+.spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border: 3px solid #e2e7ef;
+  border-top-color: #0b2f57;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-md {
+  width: 28px;
+  height: 28px;
+}
+
+.spinner-sm {
+  width: 15px;
+  height: 15px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 0;
+  color: #6b7280;
+}
+
+.btn-with-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 /* ================= UNIVERSITY DASHBOARD ================= */
 
 .uni-home {

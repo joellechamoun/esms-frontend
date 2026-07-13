@@ -2,16 +2,19 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function StudentCourses() {
   const [courses, setCourses] = useState([]);
   const [registrations, setRegistrations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showUnregisterModal, setShowUnregisterModal] = useState(false);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
   useEffect(() => {
-    fetchCourses();
-    fetchMyRegistrations();
+    Promise.all([fetchCourses(), fetchMyRegistrations()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   const fetchCourses = async () => {
@@ -97,59 +100,66 @@ function StudentCourses() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Course Name</th>
-              <th>Major</th>
-              <th>Year</th>
-              <th>Semester</th>
-              <th>Registration</th>
-            </tr>
-          </thead>
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading courses...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Course Name</th>
+                <th>Major</th>
+                <th>Year</th>
+                <th>Semester</th>
+                <th>Registration</th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {courses.map((course) => {
-              const registration = getRegistration(course._id);
+            <tbody>
+              {courses.map((course) => {
+                const registration = getRegistration(course._id);
 
-              return (
-                <tr key={course._id}>
-                  <td className="strong-cell">{course.code}</td>
-                  <td>{course.name}</td>
-                  <td>{getMajorLabel(course.major)}</td>
-                  <td>{course.year}</td>
-                  <td>{course.semester}</td>
-                  <td>
-                    {registration ? (
-                      <button
-                        className="table-btn danger-btn"
-                        onClick={() => openUnregisterModal(registration._id)}
-                      >
-                        Unregister
-                      </button>
-                    ) : (
-                      <button
-                        className="table-btn"
-                        onClick={() => handleRegister(course._id)}
-                      >
-                        Register
-                      </button>
-                    )}
+                return (
+                  <tr key={course._id}>
+                    <td className="strong-cell">{course.code}</td>
+                    <td>{course.name}</td>
+                    <td>{getMajorLabel(course.major)}</td>
+                    <td>{course.year}</td>
+                    <td>{course.semester}</td>
+                    <td>
+                      {registration ? (
+                        <button
+                          className="table-btn danger-btn"
+                          onClick={() => openUnregisterModal(registration._id)}
+                        >
+                          Unregister
+                        </button>
+                      ) : (
+                        <button
+                          className="table-btn"
+                          onClick={() => handleRegister(course._id)}
+                        >
+                          Register
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {courses.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="empty-table">
+                    No courses available yet.
                   </td>
                 </tr>
-              );
-            })}
-
-            {courses.length === 0 && (
-              <tr>
-                <td colSpan="6" className="empty-table">
-                  No courses available yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showUnregisterModal && (

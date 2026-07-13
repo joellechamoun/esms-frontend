@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import Spinner from "./Spinner";
 
 function RegistrantsModal({ course, onClose }) {
   const [registrations, setRegistrations] = useState([]);
@@ -31,7 +32,12 @@ function RegistrantsModal({ course, onClose }) {
           {course.code} - {course.name}
         </p>
 
-        {loading && <div className="empty-table">Loading...</div>}
+        {loading && (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading...</span>
+          </div>
+        )}
 
         {!loading && registrations.length === 0 && (
           <div className="empty-table">No students registered yet.</div>

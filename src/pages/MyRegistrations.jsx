@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function MyRegistrations() {
   const [registrations, setRegistrations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showUnregisterModal, setShowUnregisterModal] = useState(false);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState(null);
 
   useEffect(() => {
-    fetchRegistrations();
+    fetchRegistrations().finally(() => setLoading(false));
   }, []);
 
   const fetchRegistrations = async () => {
@@ -75,7 +77,16 @@ function MyRegistrations() {
         <p>View your registered courses grouped by semester.</p>
       </div>
 
-      {validRegistrations.length === 0 && (
+      {loading && (
+        <div className="table-card">
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading your courses...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && validRegistrations.length === 0 && (
         <div className="table-card">
           <div className="empty-table">
             You are not registered in any course yet.
@@ -83,44 +94,45 @@ function MyRegistrations() {
         </div>
       )}
 
-      {Object.keys(groupedBySemester).map((semester) => (
-        <div className="table-card" key={semester}>
-          <div className="table-header">
-            <h3>{semester} Registered Courses</h3>
-          </div>
+      {!loading &&
+        Object.keys(groupedBySemester).map((semester) => (
+          <div className="table-card" key={semester}>
+            <div className="table-header">
+              <h3>{semester} Registered Courses</h3>
+            </div>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Course Name</th>
-                <th>Major</th>
-                <th>Year</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {groupedBySemester[semester].map((reg) => (
-                <tr key={reg._id}>
-                  <td className="strong-cell">{reg.course?.code}</td>
-                  <td>{reg.course?.name}</td>
-                  <td>{getMajorLabel(reg.course?.major)}</td>
-                  <td>{reg.course?.year}</td>
-                  <td>
-                    <button
-                      className="table-btn danger-btn"
-                      onClick={() => openUnregisterModal(reg._id)}
-                    >
-                      Unregister
-                    </button>
-                  </td>
+            <table>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Course Name</th>
+                  <th>Major</th>
+                  <th>Year</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+              </thead>
+
+              <tbody>
+                {groupedBySemester[semester].map((reg) => (
+                  <tr key={reg._id}>
+                    <td className="strong-cell">{reg.course?.code}</td>
+                    <td>{reg.course?.name}</td>
+                    <td>{getMajorLabel(reg.course?.major)}</td>
+                    <td>{reg.course?.year}</td>
+                    <td>
+                      <button
+                        className="table-btn danger-btn"
+                        onClick={() => openUnregisterModal(reg._id)}
+                      >
+                        Unregister
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
 
       {showUnregisterModal && (
         <ConfirmModal

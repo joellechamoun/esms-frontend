@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import Spinner from "../components/Spinner";
 
 function StudentSchedule() {
   const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [semesterFilter, setSemesterFilter] = useState("");
 
   useEffect(() => {
-    fetchSchedule();
+    fetchSchedule().finally(() => setLoading(false));
   }, []);
 
   const fetchSchedule = async () => {
@@ -81,45 +83,52 @@ function StudentSchedule() {
           <p>{filteredExams.length} exam(s) scheduled</p>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Course</th>
-              <th>Major</th>
-              <th>Semester</th>
-              <th>Room</th>
-              <th>Session</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredExams.map((exam) => (
-              <tr key={exam._id}>
-                <td className="strong-cell">{exam.timeSlot?.date}</td>
-                <td>
-                  {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
-                </td>
-                <td>
-                  {exam.course?.code} - {exam.course?.name}
-                </td>
-                <td>{getMajorLabel(exam.course?.major)}</td>
-                <td>{exam.course?.semester}</td>
-                <td>{exam.room?.name}</td>
-                <td>{exam.examSession?.name}</td>
-              </tr>
-            ))}
-
-            {filteredExams.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading your exam schedule...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="7" className="empty-table">
-                  No exams found for the selected semester.
-                </td>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Course</th>
+                <th>Major</th>
+                <th>Semester</th>
+                <th>Room</th>
+                <th>Session</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {filteredExams.map((exam) => (
+                <tr key={exam._id}>
+                  <td className="strong-cell">{exam.timeSlot?.date}</td>
+                  <td>
+                    {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
+                  </td>
+                  <td>
+                    {exam.course?.code} - {exam.course?.name}
+                  </td>
+                  <td>{getMajorLabel(exam.course?.major)}</td>
+                  <td>{exam.course?.semester}</td>
+                  <td>{exam.room?.name}</td>
+                  <td>{exam.examSession?.name}</td>
+                </tr>
+              ))}
+
+              {filteredExams.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="empty-table">
+                    No exams found for the selected semester.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

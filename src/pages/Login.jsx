@@ -3,16 +3,20 @@ import { toast } from "react-toastify";
 import api from "../api/axios";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/examflow-logo.png";
+import Spinner from "../components/Spinner";
 import "./Login.css";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    setSubmitting(true);
 
     try {
       const res = await api.post("/auth/login", {
@@ -32,6 +36,7 @@ function Login() {
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Invalid credentials");
+      setSubmitting(false);
     }
   };
 
@@ -62,7 +67,16 @@ function Login() {
             required
           />
 
-          <button type="submit">Login</button>
+          <button type="submit" className="btn-with-spinner" disabled={submitting}>
+            {submitting ? (
+              <>
+                <Spinner size="sm" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
         </form>
 
         <div className="login-links">
