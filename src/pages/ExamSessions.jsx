@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function ExamSessions() {
   const [examSessions, setExamSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
@@ -24,7 +26,7 @@ function ExamSessions() {
   });
 
   useEffect(() => {
-    fetchExamSessions();
+    fetchExamSessions().finally(() => setLoading(false));
   }, []);
 
   const fetchExamSessions = async () => {
@@ -208,54 +210,61 @@ function ExamSessions() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Session Name</th>
-              <th>Season</th>
-              <th>Year</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {examSessions.map((session) => (
-              <tr key={session._id}>
-                <td className="strong-cell">{session.name}</td>
-                <td>{session.season}</td>
-                <td>{session.academicYear}</td>
-                <td>{session.examType}</td>
-                <td>{session.startDate?.slice(0, 10)}</td>
-                <td>{session.endDate?.slice(0, 10)}</td>
-                <td>
-                  <button
-                    className="table-btn"
-                    onClick={() => handleEdit(session)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(session._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {examSessions.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading exam sessions...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="7" className="empty-table">
-                  No exam sessions added yet.
-                </td>
+                <th>Session Name</th>
+                <th>Season</th>
+                <th>Year</th>
+                <th>Type</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {examSessions.map((session) => (
+                <tr key={session._id}>
+                  <td className="strong-cell">{session.name}</td>
+                  <td>{session.season}</td>
+                  <td>{session.academicYear}</td>
+                  <td>{session.examType}</td>
+                  <td>{session.startDate?.slice(0, 10)}</td>
+                  <td>{session.endDate?.slice(0, 10)}</td>
+                  <td>
+                    <button
+                      className="table-btn"
+                      onClick={() => handleEdit(session)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(session._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {examSessions.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="empty-table">
+                    No exam sessions added yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (

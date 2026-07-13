@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function Majors() {
   const [majors, setMajors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMajorId, setSelectedMajorId] = useState(null);
@@ -15,7 +17,7 @@ function Majors() {
   });
 
   useEffect(() => {
-    fetchMajors();
+    fetchMajors().finally(() => setLoading(false));
   }, []);
 
   const fetchMajors = async () => {
@@ -151,46 +153,53 @@ function Majors() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {majors.map((major) => (
-              <tr key={major._id}>
-                <td className="strong-cell">{major.code}</td>
-                <td>{major.name}</td>
-                <td>
-                  <button
-                    className="table-btn"
-                    onClick={() => handleEdit(major)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(major._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {majors.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading majors...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="3" className="empty-table">
-                  No majors added yet.
-                </td>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {majors.map((major) => (
+                <tr key={major._id}>
+                  <td className="strong-cell">{major.code}</td>
+                  <td>{major.name}</td>
+                  <td>
+                    <button
+                      className="table-btn"
+                      onClick={() => handleEdit(major)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(major._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {majors.length === 0 && (
+                <tr>
+                  <td colSpan="3" className="empty-table">
+                    No majors added yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (
