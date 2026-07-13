@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function TimeSlots() {
   const [examSessions, setExamSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState("");
   const [timeSlots, setTimeSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState(null);
@@ -32,7 +34,8 @@ function TimeSlots() {
 
   useEffect(() => {
     if (selectedSession) {
-      fetchTimeSlots();
+      setLoadingSlots(true);
+      fetchTimeSlots().finally(() => setLoadingSlots(false));
       resetFormOnly();
     } else {
       setTimeSlots([]);
@@ -246,51 +249,58 @@ function TimeSlots() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {timeSlots.map((slot) => (
-              <tr key={slot._id}>
-                <td className="strong-cell">{slot.date}</td>
-                <td>{slot.startTime}</td>
-                <td>{slot.endTime}</td>
-                <td>
-                  <button
-                    className="table-btn"
-                    onClick={() => handleEdit(slot)}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(slot._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {timeSlots.length === 0 && (
+        {loadingSlots ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading time slots...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="4" className="empty-table">
-                  {selectedSession
-                    ? "No time slots added for this session yet."
-                    : "Please select an exam session first."}
-                </td>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {timeSlots.map((slot) => (
+                <tr key={slot._id}>
+                  <td className="strong-cell">{slot.date}</td>
+                  <td>{slot.startTime}</td>
+                  <td>{slot.endTime}</td>
+                  <td>
+                    <button
+                      className="table-btn"
+                      onClick={() => handleEdit(slot)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(slot._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {timeSlots.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="empty-table">
+                    {selectedSession
+                      ? "No time slots added for this session yet."
+                      : "Please select an exam session first."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (

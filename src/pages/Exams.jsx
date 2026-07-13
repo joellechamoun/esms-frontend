@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function Exams() {
   const [examSessions, setExamSessions] = useState([]);
@@ -9,6 +10,7 @@ function Exams() {
   const [rooms, setRooms] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState(null);
@@ -21,8 +23,9 @@ function Exams() {
   });
 
   useEffect(() => {
-    fetchInitialData();
-    fetchExams();
+    Promise.all([fetchInitialData(), fetchExams()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   useEffect(() => {
@@ -236,54 +239,61 @@ function Exams() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Course</th>
-              <th>Major</th>
-              <th>Year</th>
-              <th>Room</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Session</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {exams.map((exam) => (
-              <tr key={exam._id}>
-                <td className="strong-cell">
-                  {exam.course?.code} - {exam.course?.name}
-                </td>
-                <td>{getMajorLabel(exam.course?.major)}</td>
-                <td>{exam.course?.year}</td>
-                <td>{exam.room?.name}</td>
-                <td>{exam.timeSlot?.date}</td>
-                <td>
-                  {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
-                </td>
-                <td>{exam.examSession?.name}</td>
-                <td>
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(exam._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {exams.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading exams...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="8" className="empty-table">
-                  No exams scheduled yet.
-                </td>
+                <th>Course</th>
+                <th>Major</th>
+                <th>Year</th>
+                <th>Room</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Session</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {exams.map((exam) => (
+                <tr key={exam._id}>
+                  <td className="strong-cell">
+                    {exam.course?.code} - {exam.course?.name}
+                  </td>
+                  <td>{getMajorLabel(exam.course?.major)}</td>
+                  <td>{exam.course?.year}</td>
+                  <td>{exam.room?.name}</td>
+                  <td>{exam.timeSlot?.date}</td>
+                  <td>
+                    {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
+                  </td>
+                  <td>{exam.examSession?.name}</td>
+                  <td>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(exam._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {exams.length === 0 && (
+                <tr>
+                  <td colSpan="8" className="empty-table">
+                    No exams scheduled yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (

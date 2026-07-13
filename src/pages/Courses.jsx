@@ -3,10 +3,12 @@ import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
 import RegistrantsModal from "../components/RegistrantsModal";
+import Spinner from "../components/Spinner";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
   const [majors, setMajors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -31,8 +33,9 @@ function Courses() {
   const availableSemesters = form.year ? semestersByYear[form.year] || [] : [];
 
   useEffect(() => {
-    fetchCourses();
-    fetchMajors();
+    Promise.all([fetchCourses(), fetchMajors()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
   const fetchCourses = async () => {
@@ -248,67 +251,74 @@ function Courses() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Major</th>
-              <th>Year</th>
-              <th>Semester</th>
-              <th>Students</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {courses.map((course) => (
-              <tr key={course._id}>
-                <td className="strong-cell">{course.code}</td>
-                <td>{course.name}</td>
-                <td>
-                  {course.major
-                    ? `${course.major.code || ""}${
-                        course.major.code && course.major.name ? " - " : ""
-                      }${course.major.name || ""}`
-                    : "No major"}
-                </td>
-                <td>{course.year}</td>
-                <td>{course.semester}</td>
-                <td>
-                  <button
-                    className="table-btn"
-                    onClick={() => setRegistrantsCourse(course)}
-                  >
-                    {course.registeredCount || 0} student(s)
-                  </button>
-                </td>
-                <td>
-                  <button
-                    className="table-btn"
-                    onClick={() => handleEdit(course)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(course._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {courses.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading courses...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="7" className="empty-table">
-                  No courses added yet.
-                </td>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Major</th>
+                <th>Year</th>
+                <th>Semester</th>
+                <th>Students</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {courses.map((course) => (
+                <tr key={course._id}>
+                  <td className="strong-cell">{course.code}</td>
+                  <td>{course.name}</td>
+                  <td>
+                    {course.major
+                      ? `${course.major.code || ""}${
+                          course.major.code && course.major.name ? " - " : ""
+                        }${course.major.name || ""}`
+                      : "No major"}
+                  </td>
+                  <td>{course.year}</td>
+                  <td>{course.semester}</td>
+                  <td>
+                    <button
+                      className="table-btn"
+                      onClick={() => setRegistrantsCourse(course)}
+                    >
+                      {course.registeredCount || 0} student(s)
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      className="table-btn"
+                      onClick={() => handleEdit(course)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(course._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {courses.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="empty-table">
+                    No courses added yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (

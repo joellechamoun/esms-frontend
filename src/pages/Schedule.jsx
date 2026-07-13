@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
+import Spinner from "../components/Spinner";
 
 function Schedule() {
   const [exams, setExams] = useState([]);
   const [examSessions, setExamSessions] = useState([]);
   const [majors, setMajors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
     examSession: "",
@@ -14,9 +16,9 @@ function Schedule() {
   });
 
   useEffect(() => {
-    fetchExamSessions();
-    fetchMajors();
-    fetchExams();
+    Promise.all([fetchExamSessions(), fetchMajors(), fetchExams()]).finally(
+      () => setLoading(false)
+    );
   }, []);
 
   const fetchExamSessions = async () => {
@@ -174,51 +176,61 @@ function Schedule() {
         </form>
       </div>
 
-      {Object.keys(groupedByYear).length === 0 && (
+      {loading && (
+        <div className="table-card">
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading exam schedule...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && Object.keys(groupedByYear).length === 0 && (
         <div className="table-card">
           <div className="empty-table">No exams scheduled yet.</div>
         </div>
       )}
 
-      {Object.keys(groupedByYear)
-        .sort((a, b) => Number(a) - Number(b))
-        .map((year) => (
-          <div className="table-card" key={year}>
-            <div className="table-header">
-              <h3>{getYearTitle(year)}</h3>
-            </div>
+      {!loading &&
+        Object.keys(groupedByYear)
+          .sort((a, b) => Number(a) - Number(b))
+          .map((year) => (
+            <div className="table-card" key={year}>
+              <div className="table-header">
+                <h3>{getYearTitle(year)}</h3>
+              </div>
 
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Course Code</th>
-                  <th>Course Name</th>
-                  <th>Major</th>
-                  <th>Room</th>
-                  <th>Exam Session</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {groupedByYear[year].map((exam) => (
-                  <tr key={exam._id}>
-                    <td className="strong-cell">{exam.timeSlot?.date}</td>
-                    <td>
-                      {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
-                    </td>
-                    <td>{exam.course?.code}</td>
-                    <td>{exam.course?.name}</td>
-                    <td>{getMajorLabel(exam.course?.major)}</td>
-                    <td>{exam.room?.name}</td>
-                    <td>{exam.examSession?.name}</td>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Major</th>
+                    <th>Room</th>
+                    <th>Exam Session</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))}
+                </thead>
+
+                <tbody>
+                  {groupedByYear[year].map((exam) => (
+                    <tr key={exam._id}>
+                      <td className="strong-cell">{exam.timeSlot?.date}</td>
+                      <td>
+                        {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
+                      </td>
+                      <td>{exam.course?.code}</td>
+                      <td>{exam.course?.name}</td>
+                      <td>{getMajorLabel(exam.course?.major)}</td>
+                      <td>{exam.room?.name}</td>
+                      <td>{exam.examSession?.name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
     </div>
   );
 }

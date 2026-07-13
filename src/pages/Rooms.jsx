@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
+import Spinner from "../components/Spinner";
 
 function Rooms() {
   const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -16,7 +18,7 @@ function Rooms() {
   });
 
   useEffect(() => {
-    fetchRooms();
+    fetchRooms().finally(() => setLoading(false));
   }, []);
 
   const fetchRooms = async () => {
@@ -162,45 +164,52 @@ function Rooms() {
           </div>
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Room Name</th>
-              <th>Capacity</th>
-              <th>Building</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {rooms.map((room) => (
-              <tr key={room._id}>
-                <td className="strong-cell">{room.name}</td>
-                <td>{room.capacity}</td>
-                <td>{room.building || "-"}</td>
-                <td>
-                  <button className="table-btn" onClick={() => handleEdit(room)}>
-                    Edit
-                  </button>
-                  <button
-                    className="table-btn danger-btn"
-                    onClick={() => openDeleteModal(room._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-
-            {rooms.length === 0 && (
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading rooms...</span>
+          </div>
+        ) : (
+          <table>
+            <thead>
               <tr>
-                <td colSpan="4" className="empty-table">
-                  No rooms added yet.
-                </td>
+                <th>Room Name</th>
+                <th>Capacity</th>
+                <th>Building</th>
+                <th>Actions</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {rooms.map((room) => (
+                <tr key={room._id}>
+                  <td className="strong-cell">{room.name}</td>
+                  <td>{room.capacity}</td>
+                  <td>{room.building || "-"}</td>
+                  <td>
+                    <button className="table-btn" onClick={() => handleEdit(room)}>
+                      Edit
+                    </button>
+                    <button
+                      className="table-btn danger-btn"
+                      onClick={() => openDeleteModal(room._id)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {rooms.length === 0 && (
+                <tr>
+                  <td colSpan="4" className="empty-table">
+                    No rooms added yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {showDeleteModal && (
