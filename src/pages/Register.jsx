@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import api from "../api/axios";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/examflow-logo.png";
+import Spinner from "../components/Spinner";
 import "./Login.css";
 
 function Register() {
@@ -12,6 +13,7 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,6 +29,8 @@ function Register() {
       return;
     }
 
+    setSubmitting(true);
+
     try {
       await api.post("/auth/student-register", {
         name: form.name,
@@ -38,6 +42,7 @@ function Register() {
       navigate("/login");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to create account");
+      setSubmitting(false);
     }
   };
 
@@ -90,7 +95,16 @@ function Register() {
             required
           />
 
-          <button type="submit">Create Student Account</button>
+          <button type="submit" className="btn-with-spinner" disabled={submitting}>
+            {submitting ? (
+              <>
+                <Spinner size="sm" />
+                Creating account...
+              </>
+            ) : (
+              "Create Student Account"
+            )}
+          </button>
         </form>
 
         <div className="login-links">
