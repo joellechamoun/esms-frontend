@@ -12,7 +12,6 @@ import ExamSessions from "./pages/ExamSessions";
 import Schedule from "./pages/Schedule";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-import TimeSlots from "./pages/TimeSlots";
 import Exams from "./pages/Exams";
 import LandingPage from "./pages/LandingPage";
 
@@ -43,7 +42,6 @@ function App() {
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/exam-sessions" element={<ExamSessions />} />
           <Route path="/schedule" element={<Schedule />} />
-          <Route path="/time-slots" element={<TimeSlots />} />
           <Route path="/exams" element={<Exams />} />
         </Route>
 

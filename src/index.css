@@ -334,9 +334,41 @@ tbody tr:hover {
   background: #f7f9fc;
 }
 
+tbody tr.active-row {
+  background: #eef3fb;
+}
+
 td button {
   margin-right: 8px;
   padding: 9px 15px;
+}
+
+/* ================= TIME SLOT GENERATOR ================= */
+
+.weekday-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.weekday-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid #cfd6df;
+  border-radius: 5px;
+  background: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.time-block-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 /* ================= RESPONSIVE ================= */

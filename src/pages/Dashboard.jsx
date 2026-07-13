@@ -4,7 +4,6 @@ import majorsIcon from "../assets/icons/majors.png";
 import coursesIcon from "../assets/icons/courses.png";
 import roomsIcon from "../assets/icons/rooms.png";
 import sessionsIcon from "../assets/icons/sessions.png";
-import timeIcon from "../assets/icons/timeslots.png";
 import examsIcon from "../assets/icons/exams.png";
 import scheduleIcon from "../assets/icons/schedule.png";
 
@@ -30,15 +29,9 @@ function Dashboard() {
     },
     {
       title: "Exam Sessions",
-      text: "Create and organize exam periods.",
+      text: "Create exam periods and manage their time slots.",
       path: "/exam-sessions",
       icon: sessionsIcon,
-    },
-    {
-      title: "Time Slots",
-      text: "Manage exam dates and time slots.",
-      path: "/time-slots",
-      icon: timeIcon,
     },
     {
       title: "Exams",

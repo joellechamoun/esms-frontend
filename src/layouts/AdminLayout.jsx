@@ -43,7 +43,6 @@ function AdminLayout() {
           <NavLink to="/courses">Courses</NavLink>
           <NavLink to="/rooms">Rooms</NavLink>
           <NavLink to="/exam-sessions">Exam Sessions</NavLink>
-          <NavLink to="/time-slots">Time Slots</NavLink>
           <NavLink to="/exams">Exams</NavLink>
           <NavLink to="/schedule">Schedule</NavLink>
         </nav>
