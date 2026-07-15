@@ -2,31 +2,30 @@ import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import logo from "../assets/examflow-logo-white.png";
 import "./AdminLayout.css";
 
-function AdminLayout() {
+function HeadOfDepartmentLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
-  //  check if we are on dashboard
-  const isHome = location.pathname === "/dashboard";
+  const isHome = location.pathname === "/hod/dashboard";
 
   return (
     <div className="portal-layout">
-      {/* TOP BAR */}
       <header className="portal-topbar">
         <div
           className="portal-brand"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/hod/dashboard")}
           style={{ cursor: "pointer" }}
         >
           <img src={logo} alt="ExamFlow Logo" />
           <div>
             <h2>ExamFlow</h2>
-            <p>Smart Exam Scheduling System</p>
+            <p>Head of Department Portal</p>
           </div>
         </div>
 
@@ -35,18 +34,11 @@ function AdminLayout() {
         </div>
       </header>
 
-      {/*  SHOW MENU ONLY IF NOT HOME */}
       {!isHome && (
         <nav className="portal-menu">
-          <NavLink to="/dashboard">Home</NavLink>
-          <NavLink to="/users">Users</NavLink>
-          <NavLink to="/departments">Departments</NavLink>
-          <NavLink to="/majors">Majors & Courses</NavLink>
-          <NavLink to="/rooms">Rooms</NavLink>
-          <NavLink to="/exam-sessions">Exam Sessions</NavLink>
-          <NavLink to="/exams">Exams</NavLink>
-          <NavLink to="/schedule">Schedule</NavLink>
-          <NavLink to="/exam-schedules">Approvals</NavLink>
+          <NavLink to="/hod/dashboard">Home</NavLink>
+          <NavLink to="/hod/courses">Courses</NavLink>
+          <NavLink to="/hod/exam-schedule">Exam Schedule</NavLink>
         </nav>
       )}
 
@@ -57,4 +49,4 @@ function AdminLayout() {
   );
 }
 
-export default AdminLayout;
+export default HeadOfDepartmentLayout;

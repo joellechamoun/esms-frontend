@@ -10,15 +10,21 @@ import scheduleIcon from "../assets/icons/schedule.png";
 function Dashboard() {
   const cards = [
     {
-      title: "Majors",
-      text: "Manage academic majors and study programs.",
-      path: "/majors",
+      title: "Users",
+      text: "Create, edit, and manage user accounts of any role.",
+      path: "/users",
       icon: majorsIcon,
     },
     {
-      title: "Courses",
-      text: "Manage academic courses by major, year, semester, and term.",
-      path: "/courses",
+      title: "Departments",
+      text: "Manage departments and assign heads of department.",
+      path: "/departments",
+      icon: majorsIcon,
+    },
+    {
+      title: "Majors & Courses",
+      text: "Manage academic majors and their courses in one place.",
+      path: "/majors",
       icon: coursesIcon,
     },
     {
@@ -44,6 +50,12 @@ function Dashboard() {
       text: "View the final exam schedule clearly.",
       path: "/schedule",
       icon: scheduleIcon,
+    },
+    {
+      title: "Approvals",
+      text: "Review, approve, reject, and publish department exam schedules.",
+      path: "/exam-schedules",
+      icon: examsIcon,
     },
   ];
 

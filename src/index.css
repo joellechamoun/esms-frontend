@@ -527,3 +527,36 @@ td {
 .registrants-modal .modal-actions {
   margin-top: 20px;
 }
+
+/* ================= SPLIT (MASTER-DETAIL) LAYOUT ================= */
+
+.split-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.split-panel-left {
+  flex: 1 1 320px;
+  max-width: 380px;
+  min-width: 280px;
+}
+
+.split-panel-right {
+  flex: 2 1 480px;
+  min-width: 320px;
+}
+
+.split-panel-left tbody tr {
+  cursor: pointer;
+}
+
+.split-empty-state {
+  background: white;
+  border: 1px solid #e1e5eb;
+  border-radius: 4px;
+  padding: 40px 22px;
+  text-align: center;
+  color: #6b7280;
+}
