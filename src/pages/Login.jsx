@@ -31,6 +31,8 @@ function Login() {
 
       if (res.data.user.role === "Student") {
         navigate("/student/courses");
+      } else if (res.data.user.role === "HeadOfDepartment") {
+        navigate("/hod/dashboard");
       } else {
         navigate("/dashboard");
       }

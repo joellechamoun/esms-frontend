@@ -4,22 +4,27 @@ import majorsIcon from "../assets/icons/majors.png";
 import coursesIcon from "../assets/icons/courses.png";
 import roomsIcon from "../assets/icons/rooms.png";
 import sessionsIcon from "../assets/icons/sessions.png";
-import timeIcon from "../assets/icons/timeslots.png";
 import examsIcon from "../assets/icons/exams.png";
 import scheduleIcon from "../assets/icons/schedule.png";
 
 function Dashboard() {
   const cards = [
     {
-      title: "Majors",
-      text: "Manage academic majors and study programs.",
-      path: "/majors",
+      title: "Users",
+      text: "Create, edit, and manage user accounts of any role.",
+      path: "/users",
       icon: majorsIcon,
     },
     {
-      title: "Courses",
-      text: "Manage academic courses by major, year, semester, and term.",
-      path: "/courses",
+      title: "Departments",
+      text: "Manage departments and assign heads of department.",
+      path: "/departments",
+      icon: majorsIcon,
+    },
+    {
+      title: "Majors & Courses",
+      text: "Manage academic majors and their courses in one place.",
+      path: "/majors",
       icon: coursesIcon,
     },
     {
@@ -30,15 +35,9 @@ function Dashboard() {
     },
     {
       title: "Exam Sessions",
-      text: "Create and organize exam periods.",
+      text: "Create exam periods and manage their time slots.",
       path: "/exam-sessions",
       icon: sessionsIcon,
-    },
-    {
-      title: "Time Slots",
-      text: "Manage exam dates and time slots.",
-      path: "/time-slots",
-      icon: timeIcon,
     },
     {
       title: "Exams",
@@ -51,6 +50,12 @@ function Dashboard() {
       text: "View the final exam schedule clearly.",
       path: "/schedule",
       icon: scheduleIcon,
+    },
+    {
+      title: "Approvals",
+      text: "Review, approve, reject, and publish department exam schedules.",
+      path: "/exam-schedules",
+      icon: examsIcon,
     },
   ];
 

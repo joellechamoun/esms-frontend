@@ -7,7 +7,6 @@ import Spinner from "../components/Spinner";
 function Exams() {
   const [examSessions, setExamSessions] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [rooms, setRooms] = useState([]);
   const [timeSlots, setTimeSlots] = useState([]);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,6 @@ function Exams() {
   const [form, setForm] = useState({
     examSession: "",
     course: "",
-    room: "",
     timeSlot: "",
   });
 
@@ -38,15 +36,13 @@ function Exams() {
 
   const fetchInitialData = async () => {
     try {
-      const [sessionsRes, coursesRes, roomsRes] = await Promise.all([
+      const [sessionsRes, coursesRes] = await Promise.all([
         api.get("/exam-sessions"),
         api.get("/courses"),
-        api.get("/rooms"),
       ]);
 
       setExamSessions(sessionsRes.data);
       setCourses(coursesRes.data);
-      setRooms(roomsRes.data);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load scheduling data");
@@ -127,7 +123,6 @@ function Exams() {
     try {
       await api.post("/exams", {
         course: form.course,
-        room: form.room,
         timeSlot: form.timeSlot,
         examSession: form.examSession,
       });
@@ -137,7 +132,6 @@ function Exams() {
       setForm({
         examSession: "",
         course: "",
-        room: "",
         timeSlot: "",
       });
 
@@ -154,7 +148,7 @@ function Exams() {
       <div className="page-header">
         <h2>Exam Scheduling</h2>
         <p>
-          Manually schedule exams by selecting a course, room, exam session, and
+          Manually schedule exams by selecting a course, exam session, and
           available time slot.
         </p>
       </div>
@@ -193,20 +187,6 @@ function Exams() {
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
                 {getCourseOptionLabel(course)}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="room"
-            value={form.room}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Room</option>
-            {rooms.map((room) => (
-              <option key={room._id} value={room._id}>
-                {room.name} - Capacity {room.capacity}
               </option>
             ))}
           </select>
@@ -251,7 +231,6 @@ function Exams() {
                 <th>Course</th>
                 <th>Major</th>
                 <th>Year</th>
-                <th>Room</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Session</th>
@@ -267,7 +246,6 @@ function Exams() {
                   </td>
                   <td>{getMajorLabel(exam.course?.major)}</td>
                   <td>{exam.course?.year}</td>
-                  <td>{exam.room?.name}</td>
                   <td>{exam.timeSlot?.date}</td>
                   <td>
                     {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
@@ -286,7 +264,7 @@ function Exams() {
 
               {exams.length === 0 && (
                 <tr>
-                  <td colSpan="8" className="empty-table">
+                  <td colSpan="7" className="empty-table">
                     No exams scheduled yet.
                   </td>
                 </tr>
