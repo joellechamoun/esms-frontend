@@ -40,14 +40,8 @@ function Dashboard() {
       icon: sessionsIcon,
     },
     {
-      title: "Exams",
-      text: "Schedule exams while respecting constraints.",
-      path: "/exams",
-      icon: examsIcon,
-    },
-    {
-      title: "Final Schedule",
-      text: "View the final exam schedule clearly.",
+      title: "Schedule",
+      text: "Drag courses onto the calendar to schedule and review exams.",
       path: "/schedule",
       icon: scheduleIcon,
     },

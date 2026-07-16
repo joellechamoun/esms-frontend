@@ -1,0 +1,162 @@
+.exam-grid-wrapper {
+  overflow-x: auto;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+table.exam-grid {
+  box-shadow: none;
+  min-width: 640px;
+}
+
+.exam-grid-corner {
+  background: #245a9b;
+}
+
+.exam-grid-major-header {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.exam-grid-major-code {
+  display: block;
+  font-size: 15px;
+}
+
+.exam-grid-major-name {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+
+.exam-grid-date-cell {
+  background: #eef3fb;
+  color: #071b33;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.exam-grid-time-cell {
+  white-space: nowrap;
+  color: #6b7280;
+  font-weight: 600;
+  background: #f7f9fc;
+}
+
+tr.date-group-start td {
+  border-top: 2px solid #cfd6df;
+}
+
+.exam-grid-cell {
+  min-width: 140px;
+  padding: 6px !important;
+  transition: background-color 0.12s ease;
+}
+
+.exam-grid-cell.cell-empty {
+  background: #fbfcfe;
+}
+
+.exam-grid-cell.cell-drop-valid {
+  background: rgba(217, 167, 56, 0.25);
+  outline: 2px dashed #d9a738;
+  outline-offset: -2px;
+}
+
+.exam-grid-cell.cell-drop-invalid {
+  background: rgba(192, 57, 43, 0.12);
+  outline: 2px dashed #c0392b;
+  outline-offset: -2px;
+}
+
+/* ================= COURSE CHIP ================= */
+
+.exam-course-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: #0b2f57;
+  color: white;
+  text-align: left;
+  user-select: none;
+}
+
+.exam-course-chip.is-draggable {
+  cursor: grab;
+}
+
+.exam-course-chip.is-clickable {
+  cursor: pointer;
+}
+
+.exam-course-chip.is-dragging {
+  opacity: 0.35;
+}
+
+.exam-course-chip .chip-code {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.exam-course-chip .chip-name {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* ================= SIDEBAR ================= */
+
+.unscheduled-course-sidebar {
+  background: white;
+  border: 1px solid #e1e5eb;
+  border-radius: 4px;
+  padding: 18px;
+}
+
+.unscheduled-course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 640px;
+  overflow-y: auto;
+}
+
+/* ================= DRAG OVERLAY ================= */
+
+.exam-course-chip.drag-overlay-chip {
+  cursor: grabbing;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ================= GRID TABS (majors or years, depending on view) ================= */
+
+.grid-tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.grid-tab {
+  padding: 8px 16px;
+  border-radius: 5px;
+  background: white;
+  border: 1px solid #cfd6df;
+  color: #0b2f57;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.grid-tab:hover {
+  background: #eef3fb;
+}
+
+.grid-tab.active {
+  background: #0b2f57;
+  color: white;
+}

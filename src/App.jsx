@@ -14,7 +14,6 @@ import ExamScheduleApprovals from "./pages/ExamScheduleApprovals";
 import Schedule from "./pages/Schedule";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-import Exams from "./pages/Exams";
 import LandingPage from "./pages/LandingPage";
 
 import StudentLayout from "./layouts/StudentLayout";
@@ -50,7 +49,6 @@ function App() {
           <Route path="/rooms" element={<Rooms />} />
           <Route path="/exam-sessions" element={<ExamSessions />} />
           <Route path="/schedule" element={<Schedule />} />
-          <Route path="/exams" element={<Exams />} />
           <Route path="/exam-schedules" element={<ExamScheduleApprovals />} />
         </Route>
 

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { DndContext } from "@dnd-kit/core";
 import api from "../api/axios";
 import ConfirmModal from "../components/ConfirmModal";
 import ReasonModal from "../components/ReasonModal";
 import Spinner from "../components/Spinner";
+import ExamGrid from "../components/examGrid/ExamGrid";
 
 const STATUS_LABELS = {
   Draft: "Draft",
@@ -19,12 +21,16 @@ const STATUS_COLORS = {
   Published: "#1a5fb4",
 };
 
+const getExamYear = (exam) => exam.course?.year;
+
 function ExamScheduleApprovals() {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
 
   const [selectedSchedule, setSelectedSchedule] = useState(null);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [selectedMajorId, setSelectedMajorId] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -51,6 +57,11 @@ function ExamScheduleApprovals() {
     try {
       const res = await api.get(`/exam-schedules/${id}`);
       setSelectedSchedule(res.data);
+      setSelectedMajorId(null);
+
+      const sessionId = res.data.examSession?._id || res.data.examSession;
+      const slotsRes = await api.get(`/exam-sessions/${sessionId}/time-slots`);
+      setTimeSlots(slotsRes.data);
     } catch (err) {
       console.error(err);
       toast.error(
@@ -112,6 +123,40 @@ function ExamScheduleApprovals() {
   const filteredSchedules = statusFilter
     ? schedules.filter((s) => s.status === statusFilter)
     : schedules;
+
+  const scheduleExams = selectedSchedule?.exams || [];
+
+  const majorTabs = useMemo(() => {
+    const seen = new Map();
+
+    for (const exam of scheduleExams) {
+      const major = exam.course?.major;
+      if (major?._id && !seen.has(major._id)) seen.set(major._id, major);
+    }
+
+    return [...seen.values()].sort((a, b) => a.code.localeCompare(b.code));
+  }, [scheduleExams]);
+
+  useEffect(() => {
+    if (majorTabs.length > 0 && !majorTabs.some((m) => m._id === selectedMajorId)) {
+      setSelectedMajorId(majorTabs[0]._id);
+    }
+  }, [majorTabs, selectedMajorId]);
+
+  const examsForMajor = useMemo(
+    () =>
+      scheduleExams.filter(
+        (exam) => (exam.course?.major?._id || exam.course?.major) === selectedMajorId
+      ),
+    [scheduleExams, selectedMajorId]
+  );
+
+  const yearColumns = useMemo(() => {
+    const years = new Set(examsForMajor.map((exam) => exam.course?.year));
+    return [...years]
+      .sort((a, b) => a - b)
+      .map((year) => ({ id: year, label: `Year ${year}` }));
+  }, [examsForMajor]);
 
   return (
     <div className="portal-page">
@@ -261,44 +306,36 @@ function ExamScheduleApprovals() {
               <Spinner />
               <span>Loading exams...</span>
             </div>
+          ) : majorTabs.length === 0 ? (
+            <div className="empty-table">No exams in this schedule.</div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Course</th>
-                  <th>Major</th>
-                  <th>Year</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {(selectedSchedule.exams || []).map((exam) => (
-                  <tr key={exam._id}>
-                    <td className="strong-cell">
-                      {exam.course?.code} - {exam.course?.name}
-                    </td>
-                    <td>
-                      {exam.course?.major?.code} - {exam.course?.major?.name}
-                    </td>
-                    <td>{exam.course?.year}</td>
-                    <td>{exam.timeSlot?.date}</td>
-                    <td>
-                      {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
-                    </td>
-                  </tr>
+            <>
+              <div className="grid-tab-bar">
+                {majorTabs.map((major) => (
+                  <button
+                    key={major._id}
+                    type="button"
+                    className={`grid-tab${
+                      selectedMajorId === major._id ? " active" : ""
+                    }`}
+                    onClick={() => setSelectedMajorId(major._id)}
+                    title={major.name}
+                  >
+                    {major.code}
+                  </button>
                 ))}
+              </div>
 
-                {(selectedSchedule.exams || []).length === 0 && (
-                  <tr>
-                    <td colSpan="5" className="empty-table">
-                      No exams in this schedule.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+              <DndContext>
+                <ExamGrid
+                  timeSlots={timeSlots}
+                  columns={yearColumns}
+                  exams={examsForMajor}
+                  editable={false}
+                  getExamColumnId={getExamYear}
+                />
+              </DndContext>
+            </>
           )}
         </div>
       )}

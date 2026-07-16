@@ -1,25 +1,57 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
+import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import api from "../api/axios";
+import ConfirmModal from "../components/ConfirmModal";
 import Spinner from "../components/Spinner";
+import ExamGrid from "../components/examGrid/ExamGrid";
+import UnscheduledCourseSidebar from "../components/examGrid/UnscheduledCourseSidebar";
+import CourseChip from "../components/examGrid/CourseChip";
+
+const getExamMajorId = (exam) => exam.course?.major?._id || exam.course?.major;
+const getCourseMajorId = (course) => course.major?._id || course.major;
 
 function Schedule() {
-  const [exams, setExams] = useState([]);
   const [examSessions, setExamSessions] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [majors, setMajors] = useState([]);
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSession, setLoadingSession] = useState(false);
 
-  const [filters, setFilters] = useState({
-    examSession: "",
-    year: "",
-    major: "",
-  });
+  const [selectedSession, setSelectedSession] = useState("");
+  const [selectedYear, setSelectedYear] = useState(null);
+  const [activeDragCourse, setActiveDragCourse] = useState(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState(null);
 
   useEffect(() => {
-    Promise.all([fetchExamSessions(), fetchMajors(), fetchExams()]).finally(
+    Promise.all([fetchExamSessions(), fetchCourses(), fetchMajors()]).finally(
       () => setLoading(false)
     );
   }, []);
+
+  useEffect(() => {
+    if (selectedSession) {
+      loadSessionData(selectedSession);
+    } else {
+      setTimeSlots([]);
+      setExams([]);
+    }
+  }, [selectedSession]);
+
+  const availableYears = useMemo(
+    () => [...new Set(courses.map((c) => c.year))].sort((a, b) => a - b),
+    [courses]
+  );
+
+  useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0]);
+    }
+  }, [availableYears, selectedYear]);
 
   const fetchExamSessions = async () => {
     try {
@@ -28,6 +60,16 @@ function Schedule() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to load exam sessions");
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get("/courses");
+      setCourses(res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load courses");
     }
   };
 
@@ -41,196 +83,230 @@ function Schedule() {
     }
   };
 
-  const fetchExams = async () => {
+  const loadSessionData = async (sessionId) => {
+    setLoadingSession(true);
+
     try {
-      const params = {};
+      const [slotsRes, examsRes] = await Promise.all([
+        api.get(`/exam-sessions/${sessionId}/time-slots`),
+        api.get("/exams", { params: { examSession: sessionId } }),
+      ]);
 
-      if (filters.examSession) params.examSession = filters.examSession;
-      if (filters.year) params.year = filters.year;
-      if (filters.major) params.major = filters.major;
-
-      const res = await api.get("/exams", { params });
-      setExams(res.data);
+      setTimeSlots(slotsRes.data);
+      setExams(examsRes.data);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load exam schedule");
+      toast.error("Failed to load exam scheduling data");
+    } finally {
+      setLoadingSession(false);
     }
   };
 
-  const getMajorLabel = (major) => {
-    if (!major) return "No major";
-    if (typeof major === "string") return "Major assigned";
-    return `${major.code || ""}${major.code && major.name ? " - " : ""}${
-      major.name || ""
-    }`;
+  const handleSessionChange = (e) => {
+    setSelectedSession(e.target.value);
   };
 
-  const handleFilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
+  const majorColumns = useMemo(
+    () => majors.map((major) => ({ id: major._id, label: major.code, sublabel: major.name })),
+    [majors]
+  );
+
+  const examsForYear = useMemo(
+    () => exams.filter((exam) => exam.course?.year === selectedYear),
+    [exams, selectedYear]
+  );
+
+  const unscheduledCourses = useMemo(() => {
+    const scheduledCourseIds = new Set(
+      exams.map((exam) => exam.course?._id).filter(Boolean)
+    );
+
+    return courses.filter(
+      (course) => course.year === selectedYear && !scheduledCourseIds.has(course._id)
+    );
+  }, [courses, exams, selectedYear]);
+
+  const handleDragStart = (event) => {
+    setActiveDragCourse(event.active.data.current?.course || null);
   };
 
-  const applyFilters = (e) => {
-    e.preventDefault();
-    fetchExams();
+  const handleDragCancel = () => {
+    setActiveDragCourse(null);
   };
 
-  const resetFilters = () => {
-    setFilters({
-      examSession: "",
-      year: "",
-      major: "",
-    });
+  const handleDragEnd = async (event) => {
+    setActiveDragCourse(null);
 
-    setTimeout(fetchExams, 0);
-    toast.info("Filters reset");
+    const { active, over } = event;
+    if (!over) return;
+
+    const course = active.data.current?.course;
+    const { timeSlot, column } = over.data.current || {};
+
+    if (!course || !timeSlot || !column) return;
+
+    if (getCourseMajorId(course) !== column.id) {
+      toast.error(`${course.code} belongs to a different major`);
+      return;
+    }
+
+    try {
+      await api.post("/exams", {
+        course: course._id,
+        timeSlot: timeSlot._id,
+        examSession: selectedSession,
+      });
+
+      toast.success(`${course.code} scheduled`);
+      loadSessionData(selectedSession);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to schedule exam");
+    }
   };
 
-  const groupedByYear = exams.reduce((acc, exam) => {
-    const year = exam.course?.year || "Unknown";
+  const openDeleteModal = (id) => {
+    setSelectedExamId(id);
+    setShowDeleteModal(true);
+  };
 
-    if (!acc[year]) acc[year] = [];
-    acc[year].push(exam);
+  const closeDeleteModal = () => {
+    setSelectedExamId(null);
+    setShowDeleteModal(false);
+  };
 
-    return acc;
-  }, {});
+  const handleDeleteExam = async () => {
+    if (!selectedExamId) return;
 
-  const getYearTitle = (year) => {
-    if (year === "1") return "Year 1 / L1 Exam Schedule";
-    if (year === "2") return "Year 2 / L2 Exam Schedule";
-    if (year === "3") return "Year 3 / L3 Exam Schedule";
-    if (year === "4") return "Year 4 / M1 Exam Schedule";
-    if (year === "5") return "Year 5 / M2 Exam Schedule";
-    return "Unknown Year Schedule";
+    try {
+      await api.delete(`/exams/${selectedExamId}`);
+      toast.success("Exam deleted successfully");
+      closeDeleteModal();
+      loadSessionData(selectedSession);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete exam");
+      closeDeleteModal();
+    }
   };
 
   return (
     <div className="portal-page">
       <div className="page-header">
-        <h2>Final Exam Schedule</h2>
+        <h2>Exam Schedule</h2>
         <p>
-          View the final exam schedule grouped by academic year, with filters
-          for session, major, and year.
+          Drag courses onto the calendar to schedule exams and review the
+          schedule across every department.
         </p>
       </div>
 
       <div className="form-card">
         <div className="section-title">
-          <h3>Filter Schedule</h3>
-          <p>Filter by exam session, major, or academic year.</p>
+          <h3>Select Exam Session</h3>
+          <p>Choose the exam session to view or schedule.</p>
         </div>
 
-        <form onSubmit={applyFilters}>
-          <select
-            name="examSession"
-            value={filters.examSession}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Exam Sessions</option>
-            {examSessions.map((session) => (
-              <option key={session._id} value={session._id}>
-                {session.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="major"
-            value={filters.major}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Majors</option>
-            {majors.map((major) => (
-              <option key={major._id} value={major._id}>
-                {major.code} - {major.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            name="year"
-            value={filters.year}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Years</option>
-            <option value="1">Year 1 / L1</option>
-            <option value="2">Year 2 / L2</option>
-            <option value="3">Year 3 / L3</option>
-            <option value="4">Year 4 / M1</option>
-            <option value="5">Year 5 / M2</option>
-          </select>
-
-          <button type="submit" className="primary-btn">
-            Apply Filters
-          </button>
-
-          <button
-            type="button"
-            className="secondary-btn"
-            onClick={resetFilters}
-          >
-            Reset
-          </button>
-        </form>
+        {loading ? (
+          <div className="loading-state">
+            <Spinner />
+            <span>Loading exam sessions...</span>
+          </div>
+        ) : (
+          <form>
+            <select value={selectedSession} onChange={handleSessionChange}>
+              <option value="">Select Exam Session</option>
+              {examSessions.map((session) => (
+                <option key={session._id} value={session._id}>
+                  {session.name}
+                </option>
+              ))}
+            </select>
+          </form>
+        )}
       </div>
 
-      {loading && (
+      {selectedSession && loadingSession && (
         <div className="table-card">
           <div className="loading-state">
             <Spinner />
-            <span>Loading exam schedule...</span>
+            <span>Loading exams...</span>
           </div>
         </div>
       )}
 
-      {!loading && Object.keys(groupedByYear).length === 0 && (
-        <div className="table-card">
-          <div className="empty-table">No exams scheduled yet.</div>
-        </div>
-      )}
-
-      {!loading &&
-        Object.keys(groupedByYear)
-          .sort((a, b) => Number(a) - Number(b))
-          .map((year) => (
-            <div className="table-card" key={year}>
-              <div className="table-header">
-                <h3>{getYearTitle(year)}</h3>
+      {selectedSession && !loadingSession && (
+        <>
+          {availableYears.length === 0 ? (
+            <div className="table-card">
+              <div className="empty-table">No courses exist yet.</div>
+            </div>
+          ) : (
+            <>
+              <div className="grid-tab-bar">
+                {availableYears.map((year) => (
+                  <button
+                    key={year}
+                    type="button"
+                    className={`grid-tab${selectedYear === year ? " active" : ""}`}
+                    onClick={() => setSelectedYear(year)}
+                  >
+                    Year {year}
+                  </button>
+                ))}
               </div>
 
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Course Code</th>
-                    <th>Course Name</th>
-                    <th>Major</th>
-                    <th>Room</th>
-                    <th>Exam Session</th>
-                  </tr>
-                </thead>
+              <DndContext
+                collisionDetection={pointerWithin}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
+              >
+                <div className="split-layout">
+                  <div className="split-panel-left">
+                    <UnscheduledCourseSidebar
+                      courses={unscheduledCourses}
+                      helpText="Drag a course onto its major's column to schedule it."
+                      emptyText="All courses for this year are scheduled."
+                    />
+                  </div>
 
-                <tbody>
-                  {groupedByYear[year].map((exam) => (
-                    <tr key={exam._id}>
-                      <td className="strong-cell">{exam.timeSlot?.date}</td>
-                      <td>
-                        {exam.timeSlot?.startTime} - {exam.timeSlot?.endTime}
-                      </td>
-                      <td>{exam.course?.code}</td>
-                      <td>{exam.course?.name}</td>
-                      <td>{getMajorLabel(exam.course?.major)}</td>
-                      <td>{exam.room?.name}</td>
-                      <td>{exam.examSession?.name}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+                  <div className="split-panel-right">
+                    <ExamGrid
+                      timeSlots={timeSlots}
+                      columns={majorColumns}
+                      exams={examsForYear}
+                      editable
+                      onRemoveExam={(exam) => openDeleteModal(exam._id)}
+                      getExamColumnId={getExamMajorId}
+                      getCourseColumnId={getCourseMajorId}
+                      emptyColumnsMessage="No majors exist yet."
+                    />
+                  </div>
+                </div>
+
+                <DragOverlay>
+                  {activeDragCourse ? (
+                    <CourseChip
+                      course={activeDragCourse}
+                      draggable={false}
+                      className="drag-overlay-chip"
+                    />
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
+            </>
+          )}
+        </>
+      )}
+
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Exam"
+          message="Are you sure you want to delete this scheduled exam? This action cannot be undone."
+          onCancel={closeDeleteModal}
+          onConfirm={handleDeleteExam}
+        />
+      )}
     </div>
   );
 }
