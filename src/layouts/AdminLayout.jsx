@@ -1,18 +1,15 @@
-import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import logo from "../assets/examflow-logo-white.png";
 import "./AdminLayout.css";
 
 function AdminLayout() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
-
-  //  check if we are on dashboard
-  const isHome = location.pathname === "/dashboard";
 
   return (
     <div className="portal-layout">
@@ -35,19 +32,16 @@ function AdminLayout() {
         </div>
       </header>
 
-      {/*  SHOW MENU ONLY IF NOT HOME */}
-      {!isHome && (
-        <nav className="portal-menu">
-          <NavLink to="/dashboard">Home</NavLink>
-          <NavLink to="/users">Users</NavLink>
-          <NavLink to="/departments">Departments</NavLink>
-          <NavLink to="/majors">Majors & Courses</NavLink>
-          <NavLink to="/rooms">Rooms</NavLink>
-          <NavLink to="/exam-sessions">Exam Sessions</NavLink>
-          <NavLink to="/schedule">Schedule</NavLink>
-          <NavLink to="/exam-schedules">Approvals</NavLink>
-        </nav>
-      )}
+      <nav className="portal-menu">
+        <NavLink to="/dashboard">Dashboard</NavLink>
+        <NavLink to="/users">Users</NavLink>
+        <NavLink to="/departments">Departments</NavLink>
+        <NavLink to="/majors">Majors & Courses</NavLink>
+        <NavLink to="/rooms">Rooms</NavLink>
+        <NavLink to="/exam-sessions">Exam Sessions</NavLink>
+        <NavLink to="/schedule">Schedule</NavLink>
+        <NavLink to="/exam-schedules">Approvals</NavLink>
+      </nav>
 
       <main className="portal-content">
         <Outlet />
