@@ -38,9 +38,11 @@ function ExamGridCell({
       {exam ? (
         <CourseChip
           course={exam.course}
-          draggable={false}
+          draggable={editable}
+          dragId={`exam-${exam._id}`}
+          dragData={{ exam }}
           onClick={editable ? () => onRemoveExam(exam) : undefined}
-          title={editable ? "Click to remove this exam" : undefined}
+          title={editable ? "Drag to move, or click to remove" : undefined}
         />
       ) : null}
     </td>

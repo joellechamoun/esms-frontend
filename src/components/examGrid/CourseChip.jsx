@@ -1,9 +1,17 @@
 import { useDraggable } from "@dnd-kit/core";
 
-function CourseChip({ course, draggable = true, onClick, title, className = "" }) {
+function CourseChip({
+  course,
+  draggable = true,
+  onClick,
+  title,
+  className = "",
+  dragId,
+  dragData,
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `course-${course._id}`,
-    data: { course },
+    id: dragId || `course-${course._id}`,
+    data: { course, ...dragData },
     disabled: !draggable,
   });
 
@@ -26,7 +34,10 @@ function CourseChip({ course, draggable = true, onClick, title, className = "" }
       {...(draggable ? { ...listeners, ...attributes } : {})}
     >
       <span className="chip-code">{course.code}</span>
-      <span className="chip-name">{course.name}</span>
+      <span className="chip-name">
+        {course.name}
+        <span className="chip-year">Year {course.year}</span>
+      </span>
     </div>
   );
 }
