@@ -60,6 +60,13 @@ function ExamScheduleApprovals() {
       setSelectedMajorId(null);
 
       const sessionId = res.data.examSession?._id || res.data.examSession;
+
+      if (!sessionId) {
+        setTimeSlots([]);
+        toast.error("This schedule's exam session no longer exists.");
+        return;
+      }
+
       const slotsRes = await api.get(`/exam-sessions/${sessionId}/time-slots`);
       setTimeSlots(slotsRes.data);
     } catch (err) {
