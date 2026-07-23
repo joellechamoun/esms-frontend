@@ -1,0 +1,168 @@
+.landing-page {
+    min-height: 100vh;
+    background: #f5f7fa;
+    color: #1f2937;
+  }
+  
+  .landing-header {
+    height: 82px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 60px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+  
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  
+  .brand img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+  }
+  
+  .brand h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #071b33;
+  }
+  
+  .brand p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  
+  .landing-nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  
+  .landing-nav a {
+    text-decoration: none;
+    color: #1f2937;
+    font-size: 15px;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+  
+  .landing-nav a:hover {
+    color: #c9a24d;
+  }
+  
+  .login-btn {
+    background: #071b33;
+    color: white !important;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.2s;
+  }
+  
+  .login-btn:hover {
+    background: #0f2f4f;
+  }
+  
+  .hero {
+    height: 520px;
+    background:
+      linear-gradient(rgba(7, 27, 51, 0.78), rgba(7, 27, 51, 0.78)),
+      url("../assets/faculty-of-science-hadath.webp");
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .hero-overlay {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 90px;
+  }
+  
+  .hero-content {
+    max-width: 600px;
+    color: white;
+  }
+  
+  .hero-content h2 {
+    font-size: 58px;
+    font-weight: 700;
+    line-height: 1.12;
+    margin-bottom: 22px;
+  }
+  
+  .highlight {
+    color: #c9a24d;
+  }
+  
+  .hero-content p {
+    font-size: 19px;
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 34px;
+    color: #e5e7eb;
+  }
+  
+  .hero-btn {
+    background: #c9a24d;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  
+  .hero-btn:hover {
+    background: #b38d3e;
+  }
+  
+  .features {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 70px 90px;
+    background: #ffffff;
+  }
+  
+  .feature-card {
+    text-align: center;
+    padding: 30px 25px;
+    border-radius: 14px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+  
+  .feature-card h3 {
+    color: #071b33;
+    margin-bottom: 10px;
+    font-size: 22px;
+  }
+  
+  .feature-card p {
+    color: #6b7280;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  
+  .landing-footer {
+    background: #071b33;
+    color: white;
+    text-align: center;
+    padding: 22px;
+  }
