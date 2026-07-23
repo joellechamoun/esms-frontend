@@ -22,6 +22,7 @@ function Schedule() {
 
   const [selectedSession, setSelectedSession] = useState("");
   const [selectedYear, setSelectedYear] = useState(null);
+  const [sidebarYearFilter, setSidebarYearFilter] = useState("all");
   const [activeDragCourse, setActiveDragCourse] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -141,6 +142,7 @@ function Schedule() {
     if (!over) return;
 
     const course = active.data.current?.course;
+    const exam = active.data.current?.exam;
     const { timeSlot, column } = over.data.current || {};
 
     if (!course || !timeSlot || !column) return;
@@ -150,18 +152,28 @@ function Schedule() {
       return;
     }
 
-    try {
-      await api.post("/exams", {
-        course: course._id,
-        timeSlot: timeSlot._id,
-        examSession: selectedSession,
-      });
+    if (exam && exam.timeSlot?._id === timeSlot._id) return;
 
-      toast.success(`${course.code} scheduled`);
+    try {
+      if (exam) {
+        await api.patch(`/exams/${exam._id}`, { timeSlot: timeSlot._id });
+        toast.success(`${course.code} moved`);
+      } else {
+        await api.post("/exams", {
+          course: course._id,
+          timeSlot: timeSlot._id,
+          examSession: selectedSession,
+        });
+        toast.success(`${course.code} scheduled`);
+      }
+
       loadSessionData(selectedSession);
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to schedule exam");
+      toast.error(
+        err.response?.data?.message ||
+          (exam ? "Failed to move exam" : "Failed to schedule exam")
+      );
     }
   };
 
@@ -267,6 +279,8 @@ function Schedule() {
                       courses={unscheduledCourses}
                       helpText="Drag a course onto its major's column to schedule it."
                       emptyText="All courses for this year are scheduled."
+                      yearFilter={sidebarYearFilter}
+                      onYearFilterChange={setSidebarYearFilter}
                     />
                   </div>
 

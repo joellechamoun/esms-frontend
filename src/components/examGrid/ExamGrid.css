@@ -105,8 +105,20 @@ tr.date-group-start td {
 }
 
 .exam-course-chip .chip-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 11px;
   opacity: 0.85;
+}
+
+.exam-course-chip .chip-year {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  opacity: 0.8;
 }
 
 /* ================= SIDEBAR ================= */
@@ -116,6 +128,37 @@ tr.date-group-start td {
   border: 1px solid #e1e5eb;
   border-radius: 4px;
   padding: 18px;
+}
+
+.sidebar-year-filter {
+  margin-bottom: 14px;
+}
+
+.sidebar-year-filter-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sidebar-year-pill {
+  padding: 5px 12px;
+  border-radius: 5px;
+  border: 1px solid #cfd6df;
+  background: white;
+  color: #0b2f57;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sidebar-year-pill:hover {
+  background: #eef3fb;
+}
+
+.sidebar-year-pill.active {
+  background: #c9a24d;
+  color: #071b33;
+  border-color: #c9a24d;
 }
 
 .unscheduled-course-list {
